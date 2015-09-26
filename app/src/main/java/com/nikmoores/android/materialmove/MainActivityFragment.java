@@ -37,8 +37,6 @@ public class MainActivityFragment extends Fragment {
     private static List<TypedArray> colourArray;
     private static ColourSet colourSet;
 
-    final static String COLOUR_SET_KEY = "colour_set";
-
     final static int DEATH_SPEED = 1000;
     final static int RESTART_SPEED = 1000;
     final static int START_SPEED = 400;
@@ -79,21 +77,8 @@ public class MainActivityFragment extends Fragment {
 
         initColours();
 
-//        if (savedInstanceState != null && savedInstanceState.containsKey(COLOUR_SET_KEY)) {
-//            colourSet = (ColourSet) savedInstanceState
-//                    .getSerializable(COLOUR_SET_KEY);
-//        }
-
         return rootView;
     }
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        Log.v(LOG_TAG, "In fragment's on save instance state ");
-//        outState.put
-//        outState.put(COLOUR_SET_KEY, colourSet);
-//    }
 
     private void initViews(View view) {
         int statusBarHeight = Utilities.getStatusBarHeight(getContext());
@@ -167,25 +152,17 @@ public class MainActivityFragment extends Fragment {
         // Initialise colourArray before attempting to use any colours.
         colourArray = Utilities.getMultiTypedArray(getContext(), "colour");
 
-        // Means to save colour configuration when screen is rotated between games.
-        int primaryColour, primaryColourDark;
-        if(colourSet == null){
+        // A means to save colour configuration when screen is rotated between games.
+        if (colourSet == null) {
             // Set new colour pairing.
             colourSet = new ColourSet();
-
-            // Set View colours
-            primaryColour = colourSet.primaryColour;
-            primaryColourDark = colourSet.primaryColourDark;
-        }else{
-            primaryColour = colourSet.previousSecondaryColour;
-            primaryColourDark = colourSet.previousSecondaryColourDark;
         }
 
         // Set View colours
-        gameView.setColour(primaryColour);
-        setToolbarColour(primaryColourDark);
-        mTempBackground.setBackgroundColor(primaryColour);
-        mTempToolbar.setBackgroundColor(primaryColourDark);
+        gameView.setColour(colourSet.primaryColour);
+        setToolbarColour(colourSet.primaryColourDark);
+        mTempBackground.setBackgroundColor(colourSet.primaryColour);
+        mTempToolbar.setBackgroundColor(colourSet.primaryColourDark);
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
     }
 
@@ -214,7 +191,6 @@ public class MainActivityFragment extends Fragment {
 //                super.onAnimationEnd(animation);
 //            }
 //        });
-
 
         mTempToolbar.setBackgroundColor(colourSet.secondaryColourDark);
         mTempBackground.setBackgroundColor(colourSet.secondaryColour);
@@ -297,8 +273,8 @@ public class MainActivityFragment extends Fragment {
             public void onAnimationEnd() {
                 if (!animationFlag) animateFab(running);
                 animationFlag = !animationFlag;
-                gameView.setColour(colourSet.previousSecondaryColour);
-                setToolbarColour(colourSet.previousSecondaryColourDark);
+                gameView.setColour(colourSet.primaryColour);
+                setToolbarColour(colourSet.primaryColourDark);
             }
 
             @Override
@@ -330,41 +306,39 @@ public class MainActivityFragment extends Fragment {
         public TypedArray primarySet;
         public TypedArray secondarySet;
 
-        public int primaryColour;
-        public int primaryColourDark;
         public int secondaryColour;
         public int secondaryColourDark;
-        public int previousSecondaryColour;
-        public int previousSecondaryColourDark;
-
-        public int activeColourSetIndex;
-
+        public int primaryColour;
+        public int primaryColourDark;
 
         public ColourSet() {
             secondarySet = colourArray.get(getRandomColourSet());
             setGameColours();
-            previousSecondaryColour = getSecondaryColour(MAIN_COLOUR_LOCATION);
-            previousSecondaryColourDark = getSecondaryColour(DARK_COLOUR_LOCATION);
         }
 
         public void setGameColours() {
-            previousSecondaryColour = getSecondaryColour(MAIN_COLOUR_LOCATION);
-            previousSecondaryColourDark = getSecondaryColour(DARK_COLOUR_LOCATION);
+            primaryColour = getSecondaryColour(MAIN_COLOUR_LOCATION);
+            primaryColourDark = getSecondaryColour(DARK_COLOUR_LOCATION);
+            primarySet = secondarySet;
 
-            activeColourSetIndex = getRandomColourSet();
-
-            // TODO: Add checks for colour clashes.
-            primarySet = colourArray.get(activeColourSetIndex);
-            secondarySet = colourArray.get(getRandomColourSet());
-
-            primaryColour = getPrimaryColour(MAIN_COLOUR_LOCATION);
-            primaryColourDark = getPrimaryColour(DARK_COLOUR_LOCATION);
+            // If primary and secondary colours are clashing, choose another random value.
+            do {
+                secondarySet = colourArray.get(getRandomColourSet());
+            } while (!isGoodColourPair());
 
             secondaryColour = getSecondaryColour(MAIN_COLOUR_LOCATION);
             secondaryColourDark = getSecondaryColour(DARK_COLOUR_LOCATION);
         }
 
-        public int getRandomColourSet() {
+        private boolean isGoodColourPair() {
+            if (secondarySet.getInt(MAIN_COLOUR_LOCATION, 0) == primaryColour) {
+                return false;
+            }
+            // TODO: Add support for rejecting too-similar colours.
+            return true;
+        }
+
+        private int getRandomColourSet() {
             return new Random().nextInt(colourArray.size());
         }
 
