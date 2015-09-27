@@ -1,97 +1,94 @@
 package com.nikmoores.android.materialmove;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.support.v4.content.ContextCompat;
+import android.os.Handler;
+import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.TextView;
 
 /**
  * Created by Nik on 24/09/2015.
  */
-public class GameView extends SurfaceView {
+public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    private Bitmap bmp;
-    private SurfaceHolder holder;
+    /**
+     * The thread that actually draws the animation
+     */
     private GameLoop gameLoop;
-    private Obstacle obstacle;
-
-    private boolean isReady = false;
 
 
-    private int x = 1;
-    private int xSpeed = 15;
-
-    private int mColour = Color.BLACK;
+    // Testing TextView.
+    private TextView mStatusText;
 
 
     public GameView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
 
-        gameLoop = new GameLoop(this);
-        holder = getHolder();
-        holder.addCallback(new SurfaceHolder.Callback() {
+        // Register to listen to SurfaceView changes.
+        SurfaceHolder holder = getHolder();
+        holder.addCallback(this);
 
+        // Create game loop thread. Actually started in SurfaceCreated().
+        gameLoop = new GameLoop(holder, context, new Handler() {
             @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                boolean retry = true;
-                gameLoop.setRunning(false);
-                while (retry) {
-                    try {
-                        gameLoop.join();
-                        retry = false;
-                    } catch (InterruptedException e) {
-                        Log.e(LOG_TAG, "Error destroying GameView: " + e.toString());
-                    }
-                }
-            }
-
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                isReady = true;
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format,
-                                       int width, int height) {
+            public void handleMessage(Message m) {
+                //noinspection ResourceType
+                mStatusText.setVisibility(m.getData().getInt("viz"));
+                mStatusText.setText(m.getData().getString("text"));
             }
         });
-        bmp = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        obstacle = new Obstacle(this, bmp);
+        // To ensure key events received.
+        setFocusable(true);
     }
 
-    public void setColour(int colour) {
-//        Log.v(LOG_TAG, "setColour: " + colour);
-        mColour = colour;
+    public GameLoop getThread() {
+        return gameLoop;
     }
 
-    public void start() {
-        if (isReady) {
-            obstacle.restart();
-            gameLoop = new GameLoop(this);
-            gameLoop.setRunning(true);
-            gameLoop.start();
-        }
+    /**
+     * Standard window-focus override. Notice focus lost so we can pause on
+     * focus lost. (Switching applications, incoming call, etc).
+     */
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        if (!hasWindowFocus) gameLoop.pause();
     }
 
-    public void stop() {
+    /**
+     * Installs a pointer to the text view used for messages.
+     */
+    public void setTextView(TextView textView) {
+        mStatusText = textView;
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        gameLoop.setRunning(true);
+        gameLoop.start();           // TODO: This can still cause an error apparently. Investigate.
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        gameLoop.setSurfaceSize(width, height);
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        // Tell thread to shutdown and wait, or it might interact with the Surface and result
+        // in something breaking.
+        boolean retry = true;
         gameLoop.setRunning(false);
-//        gameLoop.interrupt();
-    }
-
-    protected void render(Canvas canvas) {
-//        Log.v(LOG_TAG, "render called.");
-        if (canvas != null) {
-            canvas.drawColor(mColour);
-            obstacle.draw(canvas);
+        while (retry) {
+            try {
+                gameLoop.join();
+                retry = false;
+            } catch (InterruptedException e) {
+//                Log.e(LOG_TAG, "Error destroying GameView: " + e.toString());
+            }
         }
     }
 }

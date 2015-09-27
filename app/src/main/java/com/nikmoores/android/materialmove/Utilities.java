@@ -13,9 +13,11 @@ import java.util.List;
  */
 public class Utilities {
 
+    public static final String INTENT_FILTER = "com.nikmoores.android.materialmove.INTENT_FILTER";
+    public static final String STATE_KEY = "state";
+
     public static List<TypedArray> getMultiTypedArray(Context context, String key) {
         List<TypedArray> array = new ArrayList<>();
-
         try {
             Class<R.array> res = R.array.class;
             Field field;
@@ -43,7 +45,7 @@ public class Utilities {
         return result;
     }
 
-    public static int getActionBarHeight(Context context){
+    public static int getActionBarHeight(Context context) {
         TypedValue tv = new TypedValue();
         if (context.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
             return TypedValue.complexToDimensionPixelSize(

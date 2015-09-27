@@ -24,8 +24,6 @@ public class Obstacle {
     public Obstacle(GameView gameView, Bitmap bmp) {
         this.gameView = gameView;
         this.bmp = bmp;
-        this.width = bmp.getWidth() / BMP_COLUMNS;
-        this.height = bmp.getHeight() / BMP_ROWS;
     }
 
     public void restart(){
