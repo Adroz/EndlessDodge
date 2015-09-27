@@ -165,7 +165,7 @@ public class MainActivityFragment extends Fragment {
     }
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(getContext())
                 .registerReceiver((mStateChangedReceiver), new IntentFilter(Utilities.INTENT_FILTER));
@@ -181,7 +181,7 @@ public class MainActivityFragment extends Fragment {
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         LocalBroadcastManager.getInstance(getContext())
                 .unregisterReceiver(mStateChangedReceiver);
         super.onStop();
@@ -341,12 +341,13 @@ public class MainActivityFragment extends Fragment {
             public void onAnimationEnd() {
                 if (!animationFlag) {
                     // If this animation has finished first, animate the FAB in from the bottom
-                    // of the screen.
+                    // of the screen. Also reset the game to the READY state.
                     animateFabIn(START_ANIMATION_SHORT_DELAY);
+                    mGameLoop.setState(GameLoop.STATE_READY);
+                    mGameLoop.setColour(colourSet.primaryColour);
+                    setToolbarColour(colourSet.primaryColourDark);
                 }
-                animationFlag = !animationFlag;
-                mGameLoop.setColour(colourSet.primaryColour);
-                setToolbarColour(colourSet.primaryColourDark);
+                animationFlag = true;
             }
 
             @Override
@@ -387,7 +388,7 @@ public class MainActivityFragment extends Fragment {
     private BroadcastReceiver mStateChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getIntExtra(Utilities.STATE_KEY, GameLoop.STATE_PAUSE)){
+            switch (intent.getIntExtra(Utilities.STATE_KEY, GameLoop.STATE_PAUSE)) {
                 case GameLoop.STATE_END:
                     onGameStop();
                     break;

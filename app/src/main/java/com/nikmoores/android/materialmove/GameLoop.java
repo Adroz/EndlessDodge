@@ -99,16 +99,19 @@ public class GameLoop extends Thread {
         mSurfaceHolder = holder;
         mHandler = handler;
         mContext = context;
-
-        initStartingValues();
+        doReset();
     }
 
     /**
-     * Initialise starting values (score, obstacle placements, etc).
+     * Resets the game variables (obstacles, score, direction, speed, etc).
      */
-    private void initStartingValues() {
-        mCurrentScore = 0;
-        bmp = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher);
+    public void doReset() {
+        synchronized (mSurfaceHolder) {
+            mCurrentScore = 0;
+            bmp = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher);
+            x = 0;
+            y = 0;
+        }
     }
 
     /**
@@ -223,6 +226,7 @@ public class GameLoop extends Thread {
     public void setState(int mode, CharSequence message) {
         synchronized (mSurfaceHolder) {
             mMode = mode;
+            Log.v(LOG_TAG, "setState called.");
             if (mMode == STATE_RUNNING) {
                 // TODO: For testing, delete me.
                 Message msg = mHandler.obtainMessage();
@@ -234,13 +238,14 @@ public class GameLoop extends Thread {
             } else {
                 Resources res = mContext.getResources();
                 CharSequence str = "";
-                if (mMode == STATE_READY)
+                if (mMode == STATE_READY) {
+                    doReset();
                     str = "READY";
-                else if (mMode == STATE_PAUSE)
+                } else if (mMode == STATE_PAUSE)
                     str = "PAUSE";
                 else if (mMode == STATE_END)
                     str = "END " + "- score is: " + mCurrentScore;
-
+//                    str = "";
                 if (message != null) {
                     str = message + "\n" + str;
                 }
@@ -252,7 +257,6 @@ public class GameLoop extends Thread {
                 b.putInt("viz", View.VISIBLE);
                 msg.setData(b);
                 mHandler.sendMessage(msg);
-                Log.v(LOG_TAG, "Game over");
             }
         }
     }
@@ -310,7 +314,7 @@ public class GameLoop extends Thread {
 
         // TODO: Implement collision detection.
         // Check for collision
-        if(y> mCanvasHeight/2){
+        if (y > mCanvasHeight / 2) {
             setState(STATE_END, "Game Over.");
 
             Intent intent = new Intent(Utilities.INTENT_FILTER);
@@ -319,10 +323,9 @@ public class GameLoop extends Thread {
         }
     }
 
-    // Testing variables
     int x = 200;
     int y = 500;
-    int FALLING_SPEED = 1;
+    int FALLING_SPEED = 5;
     int xSpeed = 15;
     int width = 20;
     Bitmap bmp;
