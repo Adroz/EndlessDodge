@@ -2,10 +2,11 @@ package com.nikmoores.android.materialmove;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -79,9 +80,24 @@ public class GameLoop extends Thread {
     private long mLastTime;
 
     /**
+     * Scratch rectangle object.
+     */
+    private RectF mScratchRect;
+
+    /**
      * The game's background colour. Colour changes on each play through.
      */
     private int mColour = 0xFFFFFFFF;
+
+    /**
+     * The current game's colour set. Colour changes on each play through.
+     */
+    private int[] mColourSet;
+
+    /**
+     * Paint to draw the lines on screen.
+     */
+    private Paint mLinePaint;
 
     /**
      * Current game score.
@@ -97,55 +113,13 @@ public class GameLoop extends Thread {
 
     public GameLoop(SurfaceHolder holder, Context context, Handler handler) {
         mSurfaceHolder = holder;
-        mHandler = handler;
         mContext = context;
+        mHandler = handler;
+        mLinePaint = new Paint();
+        mLinePaint.setAntiAlias(true);
+        mScratchRect = new RectF(0, 0, 0, 0);
+
         doReset();
-    }
-
-    /**
-     * Resets the game variables (obstacles, score, direction, speed, etc).
-     */
-    public void doReset() {
-        synchronized (mSurfaceHolder) {
-            mCurrentScore = 0;
-            bmp = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher);
-            x = 0;
-            y = 0;
-        }
-    }
-
-    /**
-     * Starts the game, setting parameters for the current difficulty.
-     */
-    public void doStart() {
-        synchronized (mSurfaceHolder) {
-            mLastTime = System.currentTimeMillis() + 100;
-            setState(STATE_RUNNING);
-        }
-    }
-
-
-    /**
-     * Pauses the physics update & animation.
-     */
-    public void pause() {
-        synchronized (mSurfaceHolder) {
-            if (mMode == STATE_RUNNING) setState(STATE_PAUSE);
-        }
-    }
-
-    /**
-     * Restores game state from the indicated Bundle. Typically called when
-     * the Activity is being restored after having been previously
-     * destroyed.
-     *
-     * @param savedState Bundle containing the game state
-     */
-    public synchronized void restoreState(Bundle savedState) {
-        synchronized (mSurfaceHolder) {
-            setState(STATE_PAUSE);
-            mCurrentScore = savedState.getInt(KEY_SCORE);
-        }
     }
 
     @Override
@@ -175,6 +149,20 @@ public class GameLoop extends Thread {
     }
 
     /**
+     * Restores game state from the indicated Bundle. Typically called when
+     * the Activity is being restored after having been previously
+     * destroyed.
+     *
+     * @param savedState Bundle containing the game state
+     */
+    public synchronized void restoreState(Bundle savedState) {
+        synchronized (mSurfaceHolder) {
+            setState(STATE_PAUSE);
+            mCurrentScore = savedState.getInt(KEY_SCORE);
+        }
+    }
+
+    /**
      * Dump game's state to a Bundle. Typically called when the Activity is being suspended.
      *
      * @return Bundle with the game's state
@@ -183,9 +171,52 @@ public class GameLoop extends Thread {
         synchronized (mSurfaceHolder) {
             if (bundle != null) {
                 bundle.putInt(KEY_SCORE, mCurrentScore);
+//                bundle.putIntegerArrayList();
             }
         }
         return bundle;
+    }
+
+    /**
+     * Resets the game variables (obstacles, score, direction, speed, etc).
+     */
+    public void doReset() {
+        synchronized (mSurfaceHolder) {
+            mCurrentScore = 0;
+            bmp = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher);
+            x = 0;
+            y = 0;
+        }
+    }
+
+    /**
+     * Starts the game, setting parameters for the current difficulty.
+     */
+    public void doStart() {
+        synchronized (mSurfaceHolder) {
+            mLastTime = System.currentTimeMillis() + 100;
+            setState(STATE_RUNNING);
+        }
+    }
+
+    /**
+     * Pauses the physics update & animation.
+     */
+    public void pause() {
+        synchronized (mSurfaceHolder) {
+            if (mMode == STATE_RUNNING) setState(STATE_PAUSE);
+        }
+    }
+
+    /**
+     * Resumes from a pause.
+     */
+    public void unpause() {
+        // Move the real time clock up to now
+        synchronized (mSurfaceHolder) {
+            mLastTime = System.currentTimeMillis() + 100;
+        }
+        setState(STATE_RUNNING);
     }
 
     /**
@@ -226,7 +257,7 @@ public class GameLoop extends Thread {
     public void setState(int mode, CharSequence message) {
         synchronized (mSurfaceHolder) {
             mMode = mode;
-            Log.v(LOG_TAG, "setState called.");
+            Log.v(LOG_TAG, "setState called: " + mode);
             if (mMode == STATE_RUNNING) {
                 // TODO: For testing, delete me.
                 Message msg = mHandler.obtainMessage();
@@ -236,7 +267,6 @@ public class GameLoop extends Thread {
                 msg.setData(b);
                 mHandler.sendMessage(msg);
             } else {
-                Resources res = mContext.getResources();
                 CharSequence str = "";
                 if (mMode == STATE_READY) {
                     doReset();
@@ -270,29 +300,24 @@ public class GameLoop extends Thread {
         }
     }
 
-    public void setColour(int colour) {
+    public void setColour(int[] colourSet) {
         synchronized (mSurfaceHolder) {
             // Set the background colour.
-            mColour = colour;
+            mColourSet = colourSet;
+            mColour = colourSet[Utilities.COLOUR_LOCATION_MAIN];
+            mLinePaint.setColor(colourSet[Utilities.COLOUR_LOCATION_DARK]);
         }
     }
-
-    /**
-     * Resumes from a pause.
-     */
-    public void unpause() {
-        // Move the real time clock up to now
-        synchronized (mSurfaceHolder) {
-            mLastTime = System.currentTimeMillis() + 100;
-        }
-        setState(STATE_RUNNING);
-    }
-
 
     private void doDraw(Canvas canvas) {
         // Draw background.
         canvas.drawColor(mColour);
+
+        // Dummy obstacle
         canvas.drawBitmap(bmp, x, y, null);
+
+        mScratchRect.set(x, y, x + 200, y + 200);
+        canvas.drawRect(mScratchRect, mLinePaint);
     }
 
     /**
@@ -315,10 +340,11 @@ public class GameLoop extends Thread {
         // TODO: Implement collision detection.
         // Check for collision
         if (y > mCanvasHeight / 2) {
-            setState(STATE_END, "Game Over.");
+//            setState(STATE_END, "Game Over.");
 
+            Log.v(LOG_TAG, "Game over, sending intent to UI");
             Intent intent = new Intent(Utilities.INTENT_FILTER);
-            intent.putExtra(Utilities.STATE_KEY, mMode);
+            intent.putExtra(Utilities.STATE_KEY, STATE_END);
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
         }
     }

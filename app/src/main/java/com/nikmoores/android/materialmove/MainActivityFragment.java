@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
-import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -37,11 +36,11 @@ import io.codetail.animation.ViewAnimationUtils;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements View.OnClickListener {
 
     final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    private static List<TypedArray> colourArray;
+    private static List<int[]> colourArray;
     private static ColourSet colourSet;
 
     /*
@@ -100,10 +99,6 @@ public class MainActivityFragment extends Fragment {
 
         initColours();
 
-        // Register BroadcastReceiver.
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mStateChangedReceiver,
-                new IntentFilter(Utilities.INTENT_FILTER));
-
         // TODO: Try to get this working in the future. (FAB animates in on screen rotate).
 //        animateFabIn(START_ANIMATION_LONG_DELAY);
 
@@ -151,17 +146,7 @@ public class MainActivityFragment extends Fragment {
 
         // FloatingActionButton starts game on click, and is disabled until game ends.
         mFab = (FloatingActionButton) view.findViewById(R.id.fab);
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!running) {
-                    onGameStart();
-//                    mFab.setOnClickListener(null);     //TODO: Uncomment
-                } else {
-                    onGameStop();
-                }
-            }
-        });
+        mFab.setOnClickListener(this);
     }
 
     @Override
@@ -169,7 +154,6 @@ public class MainActivityFragment extends Fragment {
         super.onStart();
         LocalBroadcastManager.getInstance(getContext())
                 .registerReceiver((mStateChangedReceiver), new IntentFilter(Utilities.INTENT_FILTER));
-        super.onStop();
     }
 
     @Override
@@ -227,7 +211,7 @@ public class MainActivityFragment extends Fragment {
 
     private void initColours() {
         // Initialise colourArray before attempting to use any colours.
-        colourArray = Utilities.getMultiTypedArray(getContext(), "colour");
+        colourArray = Utilities.get2dResourceArray(getContext(), "colour");
 
         // A means to save colour configuration when screen is rotated between games.
         if (colourSet == null) {
@@ -236,7 +220,7 @@ public class MainActivityFragment extends Fragment {
         }
 
         // Set View colours
-        mGameLoop.setColour(colourSet.primaryColour);
+        mGameLoop.setColour(colourSet.primarySet);
         setToolbarColour(colourSet.primaryColourDark);
         mTempBackground.setBackgroundColor(colourSet.primaryColour);
         mTempToolbar.setBackgroundColor(colourSet.primaryColourDark);
@@ -246,6 +230,9 @@ public class MainActivityFragment extends Fragment {
     private void onGameStart() {
         Log.v(LOG_TAG, "onGameStart, game started.");
         running = true;
+
+        // Disable FAB while the game is running. // TODO: Still need to clean this up, button is not in centre.
+        mFab.setOnClickListener(null);
 
         // TODO: Fix this so I can support API 16.
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
@@ -320,6 +307,8 @@ public class MainActivityFragment extends Fragment {
 
         // Unlock screen rotation.
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+
+        mFab.setOnClickListener(this);
     }
 
     private SupportAnimator animateBackgroundReveal(final View view) {
@@ -344,7 +333,7 @@ public class MainActivityFragment extends Fragment {
                     // of the screen. Also reset the game to the READY state.
                     animateFabIn(START_ANIMATION_SHORT_DELAY);
                     mGameLoop.setState(GameLoop.STATE_READY);
-                    mGameLoop.setColour(colourSet.primaryColour);
+                    mGameLoop.setColour(colourSet.primarySet);
                     setToolbarColour(colourSet.primaryColourDark);
                 }
                 animationFlag = true;
@@ -390,6 +379,7 @@ public class MainActivityFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getIntExtra(Utilities.STATE_KEY, GameLoop.STATE_PAUSE)) {
                 case GameLoop.STATE_END:
+                    // Stopping game from broadcast receiver.
                     onGameStop();
                     break;
                 default:
@@ -398,13 +388,22 @@ public class MainActivityFragment extends Fragment {
         }
     };
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fab:      // Handle FAB click listener.
+//                if (!running) {
+                onGameStart();
+//                } else {
+//                    onGameStop();
+//                }
+        }
+    }
+
     public class ColourSet {
 
-        private final static int MAIN_COLOUR_LOCATION = 3;
-        private final static int DARK_COLOUR_LOCATION = 7;
-
-        public TypedArray primarySet;
-        public TypedArray secondarySet;
+        public int[] primarySet;
+        public int[] secondarySet;
 
         public int secondaryColour;
         public int secondaryColourDark;
@@ -417,8 +416,8 @@ public class MainActivityFragment extends Fragment {
         }
 
         public void setGameColours() {
-            primaryColour = getSecondaryColour(MAIN_COLOUR_LOCATION);
-            primaryColourDark = getSecondaryColour(DARK_COLOUR_LOCATION);
+            primaryColour = getSecondaryColour(Utilities.COLOUR_LOCATION_MAIN);
+            primaryColourDark = getSecondaryColour(Utilities.COLOUR_LOCATION_DARK);
             primarySet = secondarySet;
 
             // If primary and secondary colours are clashing, choose another random value.
@@ -426,12 +425,12 @@ public class MainActivityFragment extends Fragment {
                 secondarySet = colourArray.get(getRandomColourSet());
             } while (!isGoodColourPair());
 
-            secondaryColour = getSecondaryColour(MAIN_COLOUR_LOCATION);
-            secondaryColourDark = getSecondaryColour(DARK_COLOUR_LOCATION);
+            secondaryColour = getSecondaryColour(Utilities.COLOUR_LOCATION_MAIN);
+            secondaryColourDark = getSecondaryColour(Utilities.COLOUR_LOCATION_DARK);
         }
 
         private boolean isGoodColourPair() {
-            if (secondarySet.getInt(MAIN_COLOUR_LOCATION, 0) == primaryColour) {
+            if (secondarySet[Utilities.COLOUR_LOCATION_MAIN] == primaryColour) {
                 return false;
             }
             // TODO: Add support for rejecting too-similar colours.
@@ -442,8 +441,8 @@ public class MainActivityFragment extends Fragment {
             return new Random().nextInt(colourArray.size());
         }
 
-        public int getColour(TypedArray colour, int colourLevel) {
-            return colour.getInt(colourLevel, 0);
+        public int getColour(int[] colour, int colourLevel) {
+            return colour[colourLevel];
         }
 
         public int getPrimaryColour(int colourLevel) {
