@@ -1,19 +1,24 @@
 package com.nikmoores.android.materialmove;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static com.nikmoores.android.materialmove.WallPairComparator.ELEVATION_SORT;
+import static com.nikmoores.android.materialmove.WallPairComparator.TOP_SORT;
+import static com.nikmoores.android.materialmove.WallPairComparator.descending;
+import static com.nikmoores.android.materialmove.WallPairComparator.getComparator;
 
 /**
  * Created by Nik on 24/09/2015.
@@ -23,7 +28,7 @@ public class GameLoop extends Thread {
     final String LOG_TAG = MainActivity.class.getSimpleName();
 
     /*
-     * Game state constants
+     * Game state constants.
      */
     public static final int STATE_END = 1;
     public static final int STATE_PAUSE = 2;
@@ -31,14 +36,22 @@ public class GameLoop extends Thread {
     public static final int STATE_RUNNING = 4;
 
     /*
+     * Physics constants.
+     */
+    public static final int PHYS_X_ACCEL_SEC = 1000;     // TODO: Will need to be calculated based on screen width.
+    public static final int PHYS_X_MAX_SPEED = 400;     // TODO: Will need to be calculated based on screen width.
+    public static final int SCROLLING_Y_SPEED = 800;      // TODO: Will need to be calculated based on screen height.
+
+    /*
      * State key constants.
      */
     private static final String KEY_SCORE = "mCurrentScore";
+    private static final String KEY_COLOUR_SET = "mColourSet";
 
     /**
      * Handle to the surface manager object that's interacted with.
      */
-    private SurfaceHolder mSurfaceHolder;
+    private final SurfaceHolder mSurfaceHolder;
 
     /**
      * Message handler used by thread to interact with Views in Fragment.
@@ -75,6 +88,26 @@ public class GameLoop extends Thread {
     private boolean mRun = false;
 
     /**
+     * FAB location and radius.
+     */
+    private int[] mFabData = new int[3];
+
+    /**
+     * X axis change each frame.
+     */
+    int mX = 0;
+
+    /**
+     * Y axis change each frame.
+     */
+    int mY = 0;
+
+    /**
+     * X axis difference due to acceleration.
+     */
+    int mDX = 0;
+
+    /**
      * Variable to calculate elapsed time between frames
      */
     private long mLastTime;
@@ -100,25 +133,35 @@ public class GameLoop extends Thread {
     private Paint mLinePaint;
 
     /**
+     * Current direction of rotation of screen (left or right).
+     */
+    private int mDirection;
+
+    /**
+     * List container for all wall pairs.
+     */
+    private List<WallPair> mWallPairs = new ArrayList<>();
+
+    /**
      * Current game score.
      */
     private int mCurrentScore;
 
-
+    /**
+     * Running lock.
+     */
     private final Object mRunLock = new Object();
 
-//    static final long FPS = 60;
-//    private GameView view;
-//    private boolean running = false;
 
     public GameLoop(SurfaceHolder holder, Context context, Handler handler) {
         mSurfaceHolder = holder;
         mContext = context;
         mHandler = handler;
+
+        // Initialise variables.
         mLinePaint = new Paint();
         mLinePaint.setAntiAlias(true);
         mScratchRect = new RectF(0, 0, 0, 0);
-
         doReset();
     }
 
@@ -159,6 +202,8 @@ public class GameLoop extends Thread {
         synchronized (mSurfaceHolder) {
             setState(STATE_PAUSE);
             mCurrentScore = savedState.getInt(KEY_SCORE);
+            mColourSet = savedState.getIntArray(KEY_COLOUR_SET);
+            setColour(mColourSet);
         }
     }
 
@@ -171,7 +216,7 @@ public class GameLoop extends Thread {
         synchronized (mSurfaceHolder) {
             if (bundle != null) {
                 bundle.putInt(KEY_SCORE, mCurrentScore);
-//                bundle.putIntegerArrayList();
+                bundle.putIntArray(KEY_COLOUR_SET, mColourSet);
             }
         }
         return bundle;
@@ -183,9 +228,11 @@ public class GameLoop extends Thread {
     public void doReset() {
         synchronized (mSurfaceHolder) {
             mCurrentScore = 0;
-            bmp = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher);
-            x = 0;
-            y = 0;
+            mX = 0;
+            mY = 0;
+            mDX = 0;
+            mWallPairs.clear();
+            mWallPairs.add(new WallPair(mContext));
         }
     }
 
@@ -267,6 +314,9 @@ public class GameLoop extends Thread {
                 msg.setData(b);
                 mHandler.sendMessage(msg);
             } else {
+//                mRotating = 0;
+//                mEngineFiring = false;
+//                Resources res = mContext.getResources();
                 CharSequence str = "";
                 if (mMode == STATE_READY) {
                     doReset();
@@ -275,7 +325,6 @@ public class GameLoop extends Thread {
                     str = "PAUSE";
                 else if (mMode == STATE_END)
                     str = "END " + "- score is: " + mCurrentScore;
-//                    str = "";
                 if (message != null) {
                     str = message + "\n" + str;
                 }
@@ -291,7 +340,9 @@ public class GameLoop extends Thread {
         }
     }
 
-    /* Callback invoked when the surface dimensions change. */
+    /**
+     * Callback invoked when the surface dimensions change.
+     */
     public void setSurfaceSize(int width, int height) {
         // synchronized to make sure these all change atomically
         synchronized (mSurfaceHolder) {
@@ -300,28 +351,54 @@ public class GameLoop extends Thread {
         }
     }
 
+    public void setFabData(int posX, int posY, int radius) {
+        mFabData = new int[]{posX, posY, radius};
+    }
+
+    /**
+     * Sets the colours to be used for the obstacles and background.
+     *
+     * @param colourSet The array of colour values ranging from light to dark.
+     */
     public void setColour(int[] colourSet) {
         synchronized (mSurfaceHolder) {
-            // Set the background colour.
             mColourSet = colourSet;
+            // Set the background colour.
             mColour = colourSet[Utilities.COLOUR_LOCATION_MAIN];
-            mLinePaint.setColor(colourSet[Utilities.COLOUR_LOCATION_DARK]);
+            mLinePaint.setColor(colourSet[7]);
         }
+    }
+
+    public void setDirection(int xSpeed) {
+        mDirection = xSpeed;
+
+        // TODO: For testing, delete me.
+        String str = (mDirection > 0) ? "LEFT" : "RIGHT";
+        Message msg = mHandler.obtainMessage();
+        Bundle b = new Bundle();
+        b.putString("text", str);
+        b.putInt("viz", View.VISIBLE);
+        msg.setData(b);
+        mHandler.sendMessage(msg);
     }
 
     private void doDraw(Canvas canvas) {
         // Draw background.
         canvas.drawColor(mColour);
 
-        // Dummy obstacle
-        canvas.drawBitmap(bmp, x, y, null);
+        // Sort by elevation (lowest walls drawn first).
+        Collections.sort(mWallPairs, getComparator(ELEVATION_SORT));
 
-        mScratchRect.set(x, y, x + 200, y + 200);
-        canvas.drawRect(mScratchRect, mLinePaint);
+        // Draw walls.
+        for (WallPair wallPair : mWallPairs) {
+            mLinePaint.setColor(mColourSet[wallPair.getElevation()]);
+            canvas.drawRect(wallPair.getRect(0), mLinePaint);
+            canvas.drawRect(wallPair.getRect(1), mLinePaint);
+        }
     }
 
     /**
-     * Calculates the obstacles' states (x, y) based on direction of player movement and
+     * Calculates the obstacles' states (mX, mY) based on direction of player movement and
      * acceleration. Does not invalidate(). Called at the start of draw(). Detects collisions and
      * sets the UI to the next state.
      */
@@ -330,29 +407,57 @@ public class GameLoop extends Thread {
         // Do nothing if mLastTime is in the future. This allows the game-start to delay the
         // start of the physics by 100ms or so.
         if (mLastTime > now) return;
-        // Update Obstacles.
-        if ((x > mCanvasWidth - width - xSpeed || x + xSpeed < 0)) {
-            xSpeed = -xSpeed;
+        double elapsed = (now - mLastTime) / 500.0;
+
+        /* X axis change for walls due to screen rotation acceleration. */
+        double ddx = PHYS_X_ACCEL_SEC * elapsed * mDirection;
+        double dxOld = mDX;
+        // Calculate speed for the end of the period
+        mDX += ddx;
+        // If the X speed is greater than terminal speed, then set to terminal speed.
+        if (mDX > PHYS_X_MAX_SPEED) {
+            mDX = PHYS_X_MAX_SPEED;
+        } else if (mDX < -PHYS_X_MAX_SPEED) {
+            mDX = -PHYS_X_MAX_SPEED;
         }
-        x = x + xSpeed;
-        y = y + FALLING_SPEED;
+
+        // Update X and Y differences.
+        mX = (int) (elapsed * (mDX + dxOld) / 2);
+        mY = (int) (elapsed * SCROLLING_Y_SPEED);
+
+        // Update timer.
+        mLastTime = now;
+
+        // Update wall positions based on X and Y updates.
+        for (WallPair wallPair : mWallPairs) {
+            wallPair.updatePosition(mX, mY);
+        }
 
         // TODO: Implement collision detection.
-        // Check for collision
-        if (y > mCanvasHeight / 2) {
-//            setState(STATE_END, "Game Over.");
+        // ---- COLLISION DETECTION ----
+        // First check if any wall pairs are in line with the FAB.
+//        if (mWallPairs.get(0).getBottom() > mFabData[1]) {
+//            // Then check if either wall's inner edge is crossing the FAB
+//            if ((mWallPairs.get(0).getLeftEdge() > mFabData[0] - mFabData[2]) ||
+//                    mWallPairs.get(0).getRightEdge() < mFabData[0] + mFabData[2]) {
+//                // For now, assume a hit.
+//                // TODO: Make more accurate, after testing.
+//                Intent intent = new Intent(Utilities.INTENT_FILTER);
+//                intent.putExtra(Utilities.STATE_KEY, STATE_END);
+//                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+//            }
+//        }
 
-            Log.v(LOG_TAG, "Game over, sending intent to UI");
-            Intent intent = new Intent(Utilities.INTENT_FILTER);
-            intent.putExtra(Utilities.STATE_KEY, STATE_END);
-            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        // Sort wall pairs, so that the bottom pair is the first item.
+        Collections.sort(mWallPairs, descending(getComparator(TOP_SORT)));
+
+        // Remove wall pairs from list if they've passed through the bottom of the screen.
+        while (mWallPairs.get(0).getTop() > mCanvasHeight) {  // TODO: Might end up with issues of canvasHeight vs screenHeight...
+            mWallPairs.remove(0);
+        }
+        // Add new wall pairs to list if the top pair has just entered the top of the screen.
+        if (mWallPairs.get(mWallPairs.size() - 1).getTop() >= 0) {
+            mWallPairs.add(new WallPair(mContext));
         }
     }
-
-    int x = 200;
-    int y = 500;
-    int FALLING_SPEED = 5;
-    int xSpeed = 15;
-    int width = 20;
-    Bitmap bmp;
 }

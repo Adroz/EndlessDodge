@@ -7,6 +7,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -36,12 +40,9 @@ import io.codetail.animation.ViewAnimationUtils;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements View.OnClickListener {
+public class MainActivityFragment extends Fragment implements View.OnClickListener, SensorEventListener {
 
     final String LOG_TAG = MainActivity.class.getSimpleName();
-
-    private static List<int[]> colourArray;
-    private static ColourSet colourSet;
 
     /*
      *Animation constants
@@ -52,8 +53,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     final static int START_ANIMATION_LONG_DELAY = 400;
     final static int START_ANIMATION_SHORT_DELAY = 0;
 
-
-    private boolean running = false;
+    private static List<int[]> colourArray;
+    private static ColourSet colourSet;
 
     // Screen and View dimensioning
     private static int maxBackgroundSize;
@@ -72,6 +73,12 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private View mTempBackground;
     private View mToolbarView;
     private Toolbar mToolbar;
+
+    private TextView xValue;
+    private TextView yValue;
+    private TextView zValue;
+    private SensorManager sensorManager = null;
+    private int mXValue;
 
 
     /**
@@ -94,13 +101,13 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         View rootView = inflater.inflate(R.layout.game_fragment, container, false);
 
         initViews(rootView, savedInstanceState);
-
         initDimensions();
-
         initColours();
 
         // TODO: Try to get this working in the future. (FAB animates in on screen rotate).
 //        animateFabIn(START_ANIMATION_LONG_DELAY);
+
+        sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
 
         return rootView;
     }
@@ -131,8 +138,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mGameLoop = mGameView.getThread();
 
         //TODO: For testing, delete me.
-        // give the LunarView a handle to the TextView used for messages
         mGameView.setTextView((TextView) view.findViewById(R.id.test_text));
+        xValue = (TextView) view.findViewById(R.id.x_value);
+        yValue = (TextView) view.findViewById(R.id.y_value);
+        zValue = (TextView) view.findViewById(R.id.z_value);
 
         if (savedInstanceState == null) {
             // Game just started, therefore set up a new game.
@@ -153,7 +162,13 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(getContext())
-                .registerReceiver((mStateChangedReceiver), new IntentFilter(Utilities.INTENT_FILTER));
+                .registerReceiver(mStateChangedReceiver, new IntentFilter(Utilities.INTENT_FILTER));
+        // Register this class as a listener for the accelerometer sensor
+        sensorManager
+                .registerListener(this,
+                        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                        SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     @Override
@@ -168,6 +183,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onStop() {
         LocalBroadcastManager.getInstance(getContext())
                 .unregisterReceiver(mStateChangedReceiver);
+        sensorManager.unregisterListener(this);
         super.onStop();
     }
 
@@ -195,6 +211,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                 fabRadius = mFab.getHeight() / 2;
                 fabEndLocation[0] = (screenX - mFab.getHeight()) / 2;
                 fabEndLocation[1] = screenY - (screenY - mFab.getHeight()) / 4;
+                mGameLoop.setFabData(fabEndLocation[0], fabEndLocation[1], fabRadius);
             }
         });
 
@@ -229,7 +246,11 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
     private void onGameStart() {
         Log.v(LOG_TAG, "onGameStart, game started.");
-        running = true;
+
+        // Randomise initial acceleration direction.
+        int[] val = new int[]{-1, 1};
+        mXValue = val[new Random().nextInt(val.length)];
+        mGameLoop.setDirection(mXValue);
 
         // Disable FAB while the game is running. // TODO: Still need to clean this up, button is not in centre.
         mFab.setOnClickListener(null);
@@ -238,6 +259,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
         // TODO: Possibly add colour change animation - make FAB start as a 500 colour (darker).
+        // TODO: Create a curved path for the animation and make the movement non-linear.
         // Animate to game start position.
         TranslateAnimation animation = new TranslateAnimation(
                 0, fabEndLocation[0] - fabStartLocation[0],
@@ -252,8 +274,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                // Set game state to start.
-                mGameLoop.setState(GameLoop.STATE_RUNNING);
+                // Tell game to start.
+                mGameLoop.doStart();
             }
 
             @Override
@@ -290,7 +312,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         // TODO: Fix Me
         mGameLoop.setState(GameLoop.STATE_END);
-        running = false;
 
         // Generate new colours as the FAB will get a new colour.
         colourSet.setGameColours();
@@ -400,8 +421,33 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         }
     }
 
-    public class ColourSet {
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        synchronized (this) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+//                xValue.setText(Float.toString(event.values[0]));
+//                yValue.setText(Float.toString(event.values[1]));
+//                zValue.setText(Float.toString(event.values[2]));
 
+                // TODO: Add support for landscape mode.
+
+                // IMPORTANT: mDirection is equal to negative direction. This helps with drawing
+                // (ie: right is +ve, just as in the canvas).
+                int xDirection = (-Math.ceil(event.values[0]) < 0) ? 1 : -1;
+                if (mXValue != xDirection) {
+                    mXValue = xDirection;
+                    mGameLoop.setDirection(mXValue);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    public class ColourSet {
         public int[] primarySet;
         public int[] secondarySet;
 
