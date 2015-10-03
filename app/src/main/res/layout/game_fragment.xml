@@ -6,14 +6,43 @@
     android:layout_height="match_parent"
     tools:context=".MainActivityFragment">
 
-    <TextView
-        android:id="@+id/test_text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:elevation="10dp"
-        android:gravity="center_horizontal|center_vertical"
-        android:text="Hello World"
-        android:textSize="26sp" />
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="WORLD"
+            android:textAppearance="@android:style/TextAppearance.Large"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="173"
+            android:textSize="40sp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="PB"
+            android:textAppearance="@android:style/TextAppearance.Large"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="53"
+            android:textSize="40sp"/>
+
+    </LinearLayout>
+
+    <!--<TextView-->
+        <!--android:id="@+id/test_text"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:elevation="10dp"-->
+        <!--android:gravity="center_horizontal|center_vertical"-->
+        <!--android:text="Hello World"-->
+        <!--android:textSize="26sp" />-->
 
     <FrameLayout
         android:id="@+id/toolbar_bg"
@@ -63,34 +92,34 @@
         tools:background="@android:color/holo_orange_light" />
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:elevation="10dp"
-        android:gravity="bottom">
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:elevation="10dp"-->
+        <!--android:gravity="bottom">-->
 
-        <TextView
-            android:id="@+id/x_value"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="X Value: "
-            android:textSize="20sp" />
-        <TextView
-            android:id="@+id/y_value"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Y Value: "
-            android:textSize="20sp" />
-        <TextView
-            android:id="@+id/z_value"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Z Value: "
-            android:textSize="20sp" />
-    </LinearLayout>
+        <!--<TextView-->
+            <!--android:id="@+id/x_value"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="X Value: "-->
+            <!--android:textSize="20sp" />-->
+        <!--<TextView-->
+            <!--android:id="@+id/y_value"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="Y Value: "-->
+            <!--android:textSize="20sp" />-->
+        <!--<TextView-->
+            <!--android:id="@+id/z_value"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="Z Value: "-->
+            <!--android:textSize="20sp" />-->
+    <!--</LinearLayout>-->
 
 </io.codetail.widget.RevealFrameLayout>

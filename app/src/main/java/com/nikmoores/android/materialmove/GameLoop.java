@@ -1,20 +1,27 @@
 package com.nikmoores.android.materialmove;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.nikmoores.android.materialmove.Utilities.PHYS_X_ACCEL_SEC;
+import static com.nikmoores.android.materialmove.Utilities.PHYS_X_MAX_SPEED;
+import static com.nikmoores.android.materialmove.Utilities.SCROLLING_Y_SPEED;
+import static com.nikmoores.android.materialmove.Utilities.screenHeight;
 import static com.nikmoores.android.materialmove.WallPairComparator.ELEVATION_SORT;
 import static com.nikmoores.android.materialmove.WallPairComparator.TOP_SORT;
 import static com.nikmoores.android.materialmove.WallPairComparator.descending;
@@ -38,15 +45,23 @@ public class GameLoop extends Thread {
     /*
      * Physics constants.
      */
-    public static final int PHYS_X_ACCEL_SEC = 1000;     // TODO: Will need to be calculated based on screen width.
-    public static final int PHYS_X_MAX_SPEED = 400;     // TODO: Will need to be calculated based on screen width.
-    public static final int SCROLLING_Y_SPEED = 800;      // TODO: Will need to be calculated based on screen height.
+//    public static final int PHYS_X_ACCEL_SEC = 2500;     // TODO: Will need to be calculated based on screen width.
+//    public static final int PHYS_X_MAX_SPEED = 700;     // TODO: Will need to be calculated based on screen width.
+//    public static final int SCROLLING_Y_SPEED = 400;      // TODO: Will need to be calculated based on screen height.
 
     /*
      * State key constants.
      */
     private static final String KEY_SCORE = "mCurrentScore";
     private static final String KEY_COLOUR_SET = "mColourSet";
+
+    /*
+     * Drawing constants
+     */
+    private static final int BASE_SHADOW_LENGTH = (int) (Resources.getSystem().getDisplayMetrics().density);
+    private static final int START_COLOR = Color.parseColor("#33000000");
+    private static final int START_COLOR_MINOR = Color.parseColor("#22000000");
+    private static final int END_COLOR = Color.parseColor("#00000000");
 
     /**
      * Handle to the surface manager object that's interacted with.
@@ -68,14 +83,14 @@ public class GameLoop extends Thread {
      *
      * @see #setSurfaceSize
      */
-    private int mCanvasHeight = 1;
-
-    /**
-     * Current width of the surface/canvas.
-     *
-     * @see #setSurfaceSize
-     */
-    private int mCanvasWidth = 1;
+//    private int mCanvasHeight = 1;
+//
+//    /**
+//     * Current width of the surface/canvas.
+//     *
+//     * @see #setSurfaceSize
+//     */
+//    private int mCanvasWidth = 1;
 
     /**
      * The state of the game. One of READY, RUNNING, PAUSE, LOSE, or WIN
@@ -128,6 +143,16 @@ public class GameLoop extends Thread {
     private int[] mColourSet;
 
     /**
+     * Gradient use to paint rectangle edge shadows.
+     */
+    private GradientDrawable linearGradient;
+
+    /**
+     * Gradient used to paint rectangle corner shadows.
+     */
+    private GradientDrawable radialGradient;
+
+    /**
      * Paint to draw the lines on screen.
      */
     private Paint mLinePaint;
@@ -162,6 +187,14 @@ public class GameLoop extends Thread {
         mLinePaint = new Paint();
         mLinePaint.setAntiAlias(true);
         mScratchRect = new RectF(0, 0, 0, 0);
+
+        int[] colors = new int[]{START_COLOR, END_COLOR};
+        linearGradient = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors);
+        radialGradient = new GradientDrawable();
+        radialGradient.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        radialGradient.setColors(colors);
+        radialGradient.setGradientRadius(BASE_SHADOW_LENGTH);
+
         doReset();
     }
 
@@ -217,6 +250,7 @@ public class GameLoop extends Thread {
             if (bundle != null) {
                 bundle.putInt(KEY_SCORE, mCurrentScore);
                 bundle.putIntArray(KEY_COLOUR_SET, mColourSet);
+                // TODO: Save/load mWallPairs list.
             }
         }
         return bundle;
@@ -232,7 +266,7 @@ public class GameLoop extends Thread {
             mY = 0;
             mDX = 0;
             mWallPairs.clear();
-            mWallPairs.add(new WallPair(mContext));
+            mWallPairs.add(new WallPair());
         }
     }
 
@@ -306,17 +340,14 @@ public class GameLoop extends Thread {
             mMode = mode;
             Log.v(LOG_TAG, "setState called: " + mode);
             if (mMode == STATE_RUNNING) {
-                // TODO: For testing, delete me.
-                Message msg = mHandler.obtainMessage();
-                Bundle b = new Bundle();
-                b.putString("text", "");
-                b.putInt("viz", View.INVISIBLE);
-                msg.setData(b);
-                mHandler.sendMessage(msg);
+//                // TODO: For testing, delete me.
+//                Message msg = mHandler.obtainMessage();
+//                Bundle b = new Bundle();
+//                b.putString("text", "");
+//                b.putInt("viz", View.INVISIBLE);
+//                msg.setData(b);
+//                mHandler.sendMessage(msg);
             } else {
-//                mRotating = 0;
-//                mEngineFiring = false;
-//                Resources res = mContext.getResources();
                 CharSequence str = "";
                 if (mMode == STATE_READY) {
                     doReset();
@@ -330,12 +361,12 @@ public class GameLoop extends Thread {
                 }
                 if (mMode == STATE_END) mCurrentScore = 0;
 
-                Message msg = mHandler.obtainMessage();
-                Bundle b = new Bundle();
-                b.putString("text", str.toString());
-                b.putInt("viz", View.VISIBLE);
-                msg.setData(b);
-                mHandler.sendMessage(msg);
+//                Message msg = mHandler.obtainMessage();
+//                Bundle b = new Bundle();
+//                b.putString("text", str.toString());
+//                b.putInt("viz", View.VISIBLE);
+//                msg.setData(b);
+//                mHandler.sendMessage(msg);
             }
         }
     }
@@ -346,13 +377,20 @@ public class GameLoop extends Thread {
     public void setSurfaceSize(int width, int height) {
         // synchronized to make sure these all change atomically
         synchronized (mSurfaceHolder) {
-            mCanvasWidth = width;
-            mCanvasHeight = height;
+//            mCanvasWidth = width;
+//            mCanvasHeight = height;
         }
     }
 
+    /**
+     * Set FAB global data (in pixels) from inputs.
+     *
+     * @param posX   The centre X coordinate of the FAB.
+     * @param posY   The center Y coordinate of the FAB.
+     * @param radius The radius of the FAB.
+     */
     public void setFabData(int posX, int posY, int radius) {
-        mFabData = new int[]{posX, posY, radius};
+        mFabData = new int[]{posX + radius, posY + radius, radius};
     }
 
     /**
@@ -365,23 +403,35 @@ public class GameLoop extends Thread {
             mColourSet = colourSet;
             // Set the background colour.
             mColour = colourSet[Utilities.COLOUR_LOCATION_MAIN];
-            mLinePaint.setColor(colourSet[7]);
+            // Wall colour.
+            mLinePaint.setColor(colourSet[2]);
         }
     }
 
-    public void setDirection(int xSpeed) {
-        mDirection = xSpeed;
+    /**
+     * The direction that ball is to start moving due to screen rotation.
+     *
+     * @param direction The X direction.
+     */
+    public void setDirection(int direction) {
+        mDirection = direction;
 
-        // TODO: For testing, delete me.
-        String str = (mDirection > 0) ? "LEFT" : "RIGHT";
-        Message msg = mHandler.obtainMessage();
-        Bundle b = new Bundle();
-        b.putString("text", str);
-        b.putInt("viz", View.VISIBLE);
-        msg.setData(b);
-        mHandler.sendMessage(msg);
+//        // TODO: For testing, delete me.
+//        String str = (mDirection > 0) ? "LEFT" : "RIGHT";
+//        Message msg = mHandler.obtainMessage();
+//        Bundle b = new Bundle();
+//        b.putString("text", str);
+//        b.putInt("viz", View.VISIBLE);
+//        msg.setData(b);
+//        mHandler.sendMessage(msg);
     }
 
+    /**
+     * The method for drawing each frame of the SurfaceView-GameLoop. Draws background and every
+     * wall pair, along with their shadows.
+     *
+     * @param canvas The canvas to draw to.
+     */
     private void doDraw(Canvas canvas) {
         // Draw background.
         canvas.drawColor(mColour);
@@ -391,9 +441,25 @@ public class GameLoop extends Thread {
 
         // Draw walls.
         for (WallPair wallPair : mWallPairs) {
-            mLinePaint.setColor(mColourSet[wallPair.getElevation()]);
-            canvas.drawRect(wallPair.getRect(0), mLinePaint);
-            canvas.drawRect(wallPair.getRect(1), mLinePaint);
+//            mLinePaint.setColor(mColourSet[wallPair.getElevation()]);
+            RectF scratchRect = wallPair.getRect(WallPair.LEFT_WALL);
+            if (!scratchRect.isEmpty()) {
+                canvas.drawRect(scratchRect, mLinePaint);
+                drawRectShadow(
+                        canvas,
+                        true,
+                        wallPair.getLeftWallDimensions(),
+                        wallPair.getElevation());
+            }
+            scratchRect = wallPair.getRect(WallPair.RIGHT_WALL);
+            if (!scratchRect.isEmpty()) {
+                canvas.drawRect(scratchRect, mLinePaint);
+                drawRectShadow(
+                        canvas,
+                        false,
+                        wallPair.getRightWallDimensions(),
+                        wallPair.getElevation());
+            }
         }
     }
 
@@ -433,31 +499,141 @@ public class GameLoop extends Thread {
             wallPair.updatePosition(mX, mY);
         }
 
-        // TODO: Implement collision detection.
         // ---- COLLISION DETECTION ----
         // First check if any wall pairs are in line with the FAB.
-//        if (mWallPairs.get(0).getBottom() > mFabData[1]) {
-//            // Then check if either wall's inner edge is crossing the FAB
-//            if ((mWallPairs.get(0).getLeftEdge() > mFabData[0] - mFabData[2]) ||
-//                    mWallPairs.get(0).getRightEdge() < mFabData[0] + mFabData[2]) {
-//                // For now, assume a hit.
-//                // TODO: Make more accurate, after testing.
-//                Intent intent = new Intent(Utilities.INTENT_FILTER);
-//                intent.putExtra(Utilities.STATE_KEY, STATE_END);
-//                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-//            }
-//        }
+        for (WallPair wallPair : mWallPairs) {
+            Log.d(LOG_TAG, wallPair.toString());
+            Log.d(LOG_TAG, "FAB top = " + (mFabData[1] - mFabData[2]));
+            if ((wallPair.getBottom() > mFabData[1] - mFabData[2])
+                    && wallPair.getTop() < mFabData[1] + mFabData[0]) {
+                // Then check if either wall's inner edge is crossing the FAB
+                if ((wallPair.getLeftEdge() > mFabData[0] - mFabData[2]) ||
+                        wallPair.getRightEdge() < mFabData[0] + mFabData[2]) {
+                    // For now, assume a hit
+                    // TODO: Make more accurate, after testing.
+                    Intent intent = new Intent(Utilities.INTENT_FILTER);
+                    intent.putExtra(Utilities.STATE_KEY, STATE_END);
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                }
+            }
+        }
 
         // Sort wall pairs, so that the bottom pair is the first item.
         Collections.sort(mWallPairs, descending(getComparator(TOP_SORT)));
 
         // Remove wall pairs from list if they've passed through the bottom of the screen.
-        while (mWallPairs.get(0).getTop() > mCanvasHeight) {  // TODO: Might end up with issues of canvasHeight vs screenHeight...
+        while (mWallPairs.get(0).getTop() > screenHeight) {  // TODO: Might end up with issues of canvasHeight vs screenHeight...
             mWallPairs.remove(0);
         }
         // Add new wall pairs to list if the top pair has just entered the top of the screen.
-        if (mWallPairs.get(mWallPairs.size() - 1).getTop() >= 0) {
-            mWallPairs.add(new WallPair(mContext));
+        WallPair wallPair = mWallPairs.get(mWallPairs.size() - 1);
+        if (wallPair.getTop() >= -50) {
+            mWallPairs.add(new WallPair(
+                    wallPair.getDirection(),
+                    wallPair.getLeftEdge(),
+                    wallPair.getTop()));
         }
+    }
+
+    /**
+     * Draws realistic shadow around imported rectangle coordinates.
+     *
+     * @param canvas The canvas drawn to.
+     * @param dim    The edge coordinates of the rectangle (x, y, x + width, y + height).
+     */
+    public void drawRectShadow(Canvas canvas, boolean isLeft, int[] dim, int elevation) {
+        int shadowLength = BASE_SHADOW_LENGTH * (elevation + 4);
+        int shadowLengthMinor = shadowLength / 2;
+
+        if (isLeft) {
+            // Top edge
+            linearGradient.setColors(new int[]{START_COLOR_MINOR, END_COLOR});
+            linearGradient.setBounds(dim[0], dim[1] - shadowLengthMinor, dim[2], dim[1]);
+            linearGradient.setOrientation(GradientDrawable.Orientation.BOTTOM_TOP);
+            linearGradient.draw(canvas);
+
+            // Bottom edge
+            linearGradient.setColors(new int[]{START_COLOR, END_COLOR});
+            linearGradient.setBounds(dim[0], dim[3], dim[2], dim[3] + shadowLength);
+            linearGradient.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
+            linearGradient.draw(canvas);
+
+            // Right edge
+            linearGradient.setBounds(dim[2], dim[1] + shadowLength, dim[2] + shadowLength, dim[3]);
+            linearGradient.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+            linearGradient.draw(canvas);
+
+            radialGradient.setGradientRadius(shadowLength);
+
+            // Bottom right corner
+            radialGradient.setBounds(dim[2], dim[3], dim[2] + shadowLength, dim[3] + shadowLength);
+            radialGradient.setGradientCenter(0, 0);
+            radialGradient.draw(canvas);
+
+            // Top right corner
+            radialGradient.setBounds(dim[2], dim[1] - shadowLengthMinor, dim[2] + shadowLength, dim[1] + shadowLength);
+            radialGradient.setGradientCenter(0, 1);
+            radialGradient.draw(canvas);
+        } else {
+            // Bottom edge
+            linearGradient.setBounds(dim[0], dim[3], dim[2], dim[3] + shadowLength);
+            linearGradient.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
+            linearGradient.draw(canvas);
+
+            radialGradient.setGradientRadius(shadowLength);
+
+            // Bottom left corner
+            radialGradient.setBounds(dim[0] - shadowLengthMinor, dim[3], dim[0], dim[3] + shadowLength);
+            radialGradient.setGradientCenter(1, 0);
+            radialGradient.draw(canvas);
+        }
+//        // Bottom edge
+//        linearGradient.setBounds(
+//                dim[0] + shadowLength,
+//                dim[3],
+//                dim[2],
+//                dim[3] + shadowLength);
+//        linearGradient.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
+//        linearGradient.draw(canvas);
+//
+//        // Right edge
+//        linearGradient.setBounds(
+//                dim[2],
+//                dim[1] + shadowLength,
+//                dim[2] + shadowLength,
+//                dim[3]);
+//        linearGradient.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+//        linearGradient.draw(canvas);
+//
+//        radialGradient.setGradientRadius(shadowLength);
+//
+//        // Bottom left corner
+//        radialGradient.setBounds(
+//                dim[0],
+//                dim[3],
+//                dim[0] + shadowLength,
+//                dim[3] + shadowLength);
+//        radialGradient.setGradientCenter(1, 0);
+//        radialGradient.draw(canvas);
+//
+//        // Bottom right corner
+//        radialGradient.setBounds(
+//                dim[2],
+//                dim[3],
+//                dim[2] + shadowLength,
+//                dim[3] + shadowLength);
+//        radialGradient.setGradientCenter(0, 0);
+//        radialGradient.draw(canvas);
+//
+//        // Top right corner
+//        radialGradient.setBounds(
+//                dim[2],
+//                dim[1],
+//                dim[2] + shadowLength,
+//                dim[1] + shadowLength);
+//        radialGradient.setGradientCenter(0, 1);
+//        radialGradient.draw(canvas);
+
+
     }
 }

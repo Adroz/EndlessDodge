@@ -37,8 +37,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             @Override
             public void handleMessage(Message m) {
                 //noinspection ResourceType
-                mStatusText.setVisibility(m.getData().getInt("viz"));
-                mStatusText.setText(m.getData().getString("text"));
+//                mStatusText.setVisibility(m.getData().getInt("viz"));
+//                mStatusText.setText(m.getData().getString("text"));
             }
         });
         // To ensure key events received.

@@ -17,7 +17,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +35,9 @@ import java.util.Random;
 
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
+
+import static com.nikmoores.android.materialmove.Utilities.screenHeight;
+import static com.nikmoores.android.materialmove.Utilities.screenWidth;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -58,10 +60,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
     // Screen and View dimensioning
     private static int maxBackgroundSize;
-    private static int screenX;
-    private static int screenY;
-    private static int[] fabStartLocation = new int[2];
-    private static int[] fabEndLocation = new int[]{0, 0};
+    //    private static int screenX;
+//    private static int screenY;
+    public static int[] fabStartLocation = new int[2];
+    public static int[] fabEndLocation = new int[]{0, 0};
     private static int fabRadius;
     private static int statusBarOffset;  // Only > 0 when API is <21 (should be tested and confirmed).
 
@@ -100,6 +102,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.game_fragment, container, false);
 
+        Utilities.setScreenDimensions(getContext());
         initViews(rootView, savedInstanceState);
         initDimensions();
         initColours();
@@ -138,10 +141,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mGameLoop = mGameView.getThread();
 
         //TODO: For testing, delete me.
-        mGameView.setTextView((TextView) view.findViewById(R.id.test_text));
-        xValue = (TextView) view.findViewById(R.id.x_value);
-        yValue = (TextView) view.findViewById(R.id.y_value);
-        zValue = (TextView) view.findViewById(R.id.z_value);
+//        mGameView.setTextView((TextView) view.findViewById(R.id.test_text));
+//        xValue = (TextView) view.findViewById(R.id.x_value);
+//        yValue = (TextView) view.findViewById(R.id.y_value);
+//        zValue = (TextView) view.findViewById(R.id.z_value);
 
         if (savedInstanceState == null) {
             // Game just started, therefore set up a new game.
@@ -196,12 +199,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     }
 
     private void initDimensions() {
-        // Get screen dimensions.
-        DisplayMetrics dm = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
-        screenX = dm.widthPixels;
-        screenY = dm.heightPixels;
-
         // Code segment runs after FAB View is drawn to screen (otherwise some values are zero).
         mFab.post(new Runnable() {
             @Override
@@ -209,9 +206,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                 // Get FAB start and end locations, and radius
                 mFab.getLocationOnScreen(fabStartLocation);
                 fabRadius = mFab.getHeight() / 2;
-                fabEndLocation[0] = (screenX - mFab.getHeight()) / 2;
-                fabEndLocation[1] = screenY - (screenY - mFab.getHeight()) / 4;
+                fabEndLocation[0] = (screenWidth - mFab.getHeight()) / 2;
+                fabEndLocation[1] = screenHeight - (screenWidth - mFab.getHeight()) / 4;
                 mGameLoop.setFabData(fabEndLocation[0], fabEndLocation[1], fabRadius);
+                Utilities.setFabMeasurements(fabEndLocation[0], fabEndLocation[1], fabRadius);
             }
         });
 
@@ -220,7 +218,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
             public void run() {
                 // Get the final radius for the clipping circle
                 maxBackgroundSize = Math.max(mTempBackground.getWidth(), mTempBackground.getHeight());
-                statusBarOffset = screenY - mTempBackground.getHeight();
+                statusBarOffset = screenHeight - mTempBackground.getHeight();
                 fabEndLocation[1] -= statusBarOffset; // Doesn't matter what view finishes first.
             }
         });
