@@ -17,11 +17,14 @@ import java.util.List;
  */
 public class Utilities {
 
+    static final String LOG_TAG = Utilities.class.getSimpleName();
+
     /* Intent Constants */
     public static final String INTENT_FILTER = "com.nikmoores.android.materialmove.INTENT_FILTER";
     public static final String STATE_KEY = "state";
 
     /* Colour location constants */
+    public final static int COLOUR_LOCATION_LIGHT = 2;
     public final static int COLOUR_LOCATION_MAIN = 3;
     public final static int COLOUR_LOCATION_DARK = 5;
 
@@ -30,7 +33,7 @@ public class Utilities {
     public static int screenHeight = 500;
     public static int MAX_WIDTH = 200;
     public static int MIN_WIDTH = 100;
-    public static int MAX_HEIGHT = 200;
+    public static int WALL_HEIGHT = 200;
     public static int MIN_HEIGHT = 100;
 
     /* Physics values */
@@ -42,6 +45,9 @@ public class Utilities {
     public static int FAB_X = 100;
     public static int FAB_Y = 100;
     public static int FAB_RADIUS = 10;
+
+    public static int WALL_WIDTH;
+    public static final int NUMBER_OF_WALLS = 8;
 
     public static final int MAX_ELEVATION = 9;
     public static final int MIN_ELEVATION = 0;
@@ -57,7 +63,7 @@ public class Utilities {
         MAX_WIDTH = screenWidth - screenWidth / 10;
         MIN_WIDTH = (int) Math.floor(screenWidth / 2.5);
 
-        MAX_HEIGHT = screenHeight / 8;
+        WALL_HEIGHT = screenHeight / NUMBER_OF_WALLS;
         MIN_HEIGHT = screenHeight / 10;
         Log.d("Utilities", "screen: " + screenWidth + "/" + screenHeight);
 
@@ -72,6 +78,11 @@ public class Utilities {
         FAB_X = fabX;
         FAB_Y = fabY;
         FAB_RADIUS = fabRadius;
+
+        // Set wall width.
+        int minWidth = FAB_RADIUS * 9;
+        WALL_WIDTH = (FAB_RADIUS * 11 - minWidth) + minWidth;
+        Log.d(LOG_TAG, "FAB location - " + FAB_X + "," + FAB_Y + " & FAB radius = " + FAB_RADIUS);
     }
 
     public static List<int[]> get2dResourceArray(Context context, String key) {
@@ -115,6 +126,10 @@ public class Utilities {
                     tv.data, context.getResources().getDisplayMetrics());
         }
         return 0;
+    }
+
+    public static int interpolate(double ratio, int valueTo, int valueFrom) {
+        return (int) Math.abs((ratio * valueTo) + ((1 - ratio) * valueFrom));
     }
 
 }

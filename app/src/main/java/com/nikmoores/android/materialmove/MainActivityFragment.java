@@ -148,7 +148,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         if (savedInstanceState == null) {
             // Game just started, therefore set up a new game.
-            mGameLoop.setState(GameLoop.STATE_READY);
+            mGameLoop.setState(GameLoop.STATE_END);
             Log.w(LOG_TAG, "sIS is null");
         } else {
             // Game is being restored, therefore resume the previous game.

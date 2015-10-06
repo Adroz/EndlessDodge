@@ -6,10 +6,11 @@ import java.util.Random;
 
 import static com.nikmoores.android.materialmove.Utilities.FAB_RADIUS;
 import static com.nikmoores.android.materialmove.Utilities.MAX_ELEVATION;
-import static com.nikmoores.android.materialmove.Utilities.MAX_HEIGHT;
 import static com.nikmoores.android.materialmove.Utilities.MAX_WIDTH;
 import static com.nikmoores.android.materialmove.Utilities.MIN_ELEVATION;
 import static com.nikmoores.android.materialmove.Utilities.MIN_HEIGHT;
+import static com.nikmoores.android.materialmove.Utilities.WALL_HEIGHT;
+import static com.nikmoores.android.materialmove.Utilities.WALL_WIDTH;
 import static com.nikmoores.android.materialmove.Utilities.screenWidth;
 
 /**
@@ -17,7 +18,7 @@ import static com.nikmoores.android.materialmove.Utilities.screenWidth;
  */
 public class WallPair {
 
-    final String LOG_TAG = MainActivity.class.getSimpleName();
+    final String LOG_TAG = WallPair.class.getSimpleName();
 
     public static final int LEFT_WALL = 0;
     public static final int RIGHT_WALL = 1;
@@ -34,7 +35,7 @@ public class WallPair {
      * Default constructor. Should only be used for initial call.
      */
     public WallPair() {
-        initialiseWallPair(new Random().nextBoolean(), screenWidth / 2, -MAX_HEIGHT);
+        initialiseWallPair(new Random().nextBoolean(), screenWidth / 2, -WALL_HEIGHT);
     }
 
     /**
@@ -61,10 +62,6 @@ public class WallPair {
      * @param topEdge   The Y coordinate of the previous wall pair's top edge.
      */
     public void initialiseWallPair(boolean direction, int leftEdge, int topEdge) {
-        // Set random width.
-        int minWidth = FAB_RADIUS * 9;
-        width = (FAB_RADIUS * 11 - minWidth) + minWidth;
-
         // Set xOffset direction based on input direction.
         if (new Random().nextInt(100) < PERCENT_CHANCE_SAME) {
             this.direction = direction;
@@ -73,7 +70,7 @@ public class WallPair {
         }
 
         // Left wall inner edge calculations.
-        int offset = screenWidth / 6;
+        int offset = screenWidth / 6;       // TODO: Move this.
         if (direction) { // Heading left.
             xOffset = leftEdge - offset;
         } else {
@@ -81,7 +78,10 @@ public class WallPair {
         }
 
         // Set height.
-        height = MAX_HEIGHT;
+        height = WALL_HEIGHT;
+
+        // Set width.
+        width = WALL_WIDTH;
 
         // Set elevation.
         elevation = new Random().nextInt(MAX_ELEVATION - MIN_ELEVATION) + MIN_ELEVATION;
@@ -120,7 +120,7 @@ public class WallPair {
         xOffset += (avgWidth - width) / 2;
 
         // Set height.
-        height = new Random().nextInt(MAX_HEIGHT - MIN_HEIGHT + 1) + MIN_HEIGHT;
+        height = new Random().nextInt(WALL_HEIGHT - MIN_HEIGHT + 1) + MIN_HEIGHT;
 
         // Set elevation.
         elevation = new Random().nextInt(MAX_ELEVATION - MIN_ELEVATION) + MIN_ELEVATION;
@@ -192,6 +192,10 @@ public class WallPair {
      */
     public boolean getDirection() {
         return direction;
+    }
+
+    public void setXOffset(int offset) {
+        xOffset = offset;
     }
 
     @Override

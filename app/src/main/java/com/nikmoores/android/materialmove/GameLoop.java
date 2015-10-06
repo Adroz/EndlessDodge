@@ -17,11 +17,16 @@ import android.view.SurfaceHolder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
+import static com.nikmoores.android.materialmove.Utilities.FAB_Y;
+import static com.nikmoores.android.materialmove.Utilities.MAX_WIDTH;
 import static com.nikmoores.android.materialmove.Utilities.PHYS_X_ACCEL_SEC;
 import static com.nikmoores.android.materialmove.Utilities.PHYS_X_MAX_SPEED;
 import static com.nikmoores.android.materialmove.Utilities.SCROLLING_Y_SPEED;
+import static com.nikmoores.android.materialmove.Utilities.WALL_HEIGHT;
 import static com.nikmoores.android.materialmove.Utilities.screenHeight;
+import static com.nikmoores.android.materialmove.Utilities.screenWidth;
 import static com.nikmoores.android.materialmove.WallPairComparator.ELEVATION_SORT;
 import static com.nikmoores.android.materialmove.WallPairComparator.TOP_SORT;
 import static com.nikmoores.android.materialmove.WallPairComparator.descending;
@@ -32,7 +37,7 @@ import static com.nikmoores.android.materialmove.WallPairComparator.getComparato
  */
 public class GameLoop extends Thread {
 
-    final String LOG_TAG = MainActivity.class.getSimpleName();
+    final String LOG_TAG = GameLoop.class.getSimpleName();
 
     /*
      * Game state constants.
@@ -40,7 +45,8 @@ public class GameLoop extends Thread {
     public static final int STATE_END = 1;
     public static final int STATE_PAUSE = 2;
     public static final int STATE_READY = 3;
-    public static final int STATE_RUNNING = 4;
+    public static final int STATE_STARTING = 4;
+    public static final int STATE_RUNNING = 5;
 
     /*
      * Physics constants.
@@ -138,6 +144,11 @@ public class GameLoop extends Thread {
     private int mColour = 0xFFFFFFFF;
 
     /**
+     * The game's wall colour. Colour changes each play through.
+     */
+    private int mWallColour = 0xFFFFFFFF;
+
+    /**
      * The current game's colour set. Colour changes on each play through.
      */
     private int[] mColourSet;
@@ -195,7 +206,7 @@ public class GameLoop extends Thread {
         radialGradient.setColors(colors);
         radialGradient.setGradientRadius(BASE_SHADOW_LENGTH);
 
-        doReset();
+//        doReset();
     }
 
     @Override
@@ -265,8 +276,35 @@ public class GameLoop extends Thread {
             mX = 0;
             mY = 0;
             mDX = 0;
-            mWallPairs.clear();
-            mWallPairs.add(new WallPair());
+            diff = 0;   // FIXME: 04/10/2015 Temp value.
+//            if (mWallPairs.size() == 0) {
+            // If no walls, create wall set.
+            int i;
+            for (i = 0; i < Utilities.NUMBER_OF_WALLS - 1; i++) {
+                int top = screenHeight - WALL_HEIGHT * i;
+                mWallPairs.add(new WallPair(
+                        new Random().nextBoolean(),
+                        100,
+                        top));
+                int wallPairTop = mWallPairs.get(i).getTop();
+                // Get wall that would be at FAB height.
+                if (wallPairTop < FAB_Y && (wallPairTop + WALL_HEIGHT) > FAB_Y) {
+                    mWallPairs.get(i).setXOffset((screenWidth - MAX_WIDTH) / 2);
+                    for (int j = 0; j < i; j++) {
+                        WallPair wallPair = mWallPairs.get(i - j - 1);
+                        wallPair.initialiseWallPair(
+                                mWallPairs.get(i - j).getDirection(),
+                                mWallPairs.get(i - j).getLeftEdge(),
+                                wallPair.getTop() + WALL_HEIGHT);
+                    }
+                    break;
+                }
+            }
+            for (int k = i; k < Utilities.NUMBER_OF_WALLS - 1; k++) {
+                mWallPairs.add(new WallPair(mWallPairs.get(k).getDirection(),
+                        mWallPairs.get(k).getLeftEdge(),
+                        mWallPairs.get(k).getTop()));
+            }
         }
     }
 
@@ -274,9 +312,10 @@ public class GameLoop extends Thread {
      * Starts the game, setting parameters for the current difficulty.
      */
     public void doStart() {
+        doReset();
         synchronized (mSurfaceHolder) {
             mLastTime = System.currentTimeMillis() + 100;
-            setState(STATE_RUNNING);
+            setState(STATE_STARTING);
         }
     }
 
@@ -404,7 +443,8 @@ public class GameLoop extends Thread {
             // Set the background colour.
             mColour = colourSet[Utilities.COLOUR_LOCATION_MAIN];
             // Wall colour.
-            mLinePaint.setColor(colourSet[2]);
+            mWallColour = colourSet[Utilities.COLOUR_LOCATION_LIGHT];
+            mLinePaint.setColor(mWallColour);
         }
     }
 
@@ -432,9 +472,16 @@ public class GameLoop extends Thread {
      *
      * @param canvas The canvas to draw to.
      */
+    int diff = 0;
+
     private void doDraw(Canvas canvas) {
         // Draw background.
         canvas.drawColor(mColour);
+
+        if (mMode == STATE_STARTING) {
+            // Animate wall pairs in
+            setState(STATE_RUNNING);
+        }
 
         // Sort by elevation (lowest walls drawn first).
         Collections.sort(mWallPairs, getComparator(ELEVATION_SORT));
@@ -505,7 +552,7 @@ public class GameLoop extends Thread {
             Log.d(LOG_TAG, wallPair.toString());
             Log.d(LOG_TAG, "FAB top = " + (mFabData[1] - mFabData[2]));
             if ((wallPair.getBottom() > mFabData[1] - mFabData[2])
-                    && wallPair.getTop() < mFabData[1] + mFabData[0]) {
+                    && wallPair.getTop() < mFabData[1] + mFabData[2]) {
                 // Then check if either wall's inner edge is crossing the FAB
                 if ((wallPair.getLeftEdge() > mFabData[0] - mFabData[2]) ||
                         wallPair.getRightEdge() < mFabData[0] + mFabData[2]) {
