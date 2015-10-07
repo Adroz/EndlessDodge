@@ -277,33 +277,48 @@ public class GameLoop extends Thread {
             mY = 0;
             mDX = 0;
             diff = 0;   // FIXME: 04/10/2015 Temp value.
-//            if (mWallPairs.size() == 0) {
-            // If no walls, create wall set.
-            int i;
-            for (i = 0; i < Utilities.NUMBER_OF_WALLS - 1; i++) {
-                int top = screenHeight - WALL_HEIGHT * i;
-                mWallPairs.add(new WallPair(
-                        new Random().nextBoolean(),
-                        100,
-                        top));
-                int wallPairTop = mWallPairs.get(i).getTop();
-                // Get wall that would be at FAB height.
-                if (wallPairTop < FAB_Y && (wallPairTop + WALL_HEIGHT) > FAB_Y) {
-                    mWallPairs.get(i).setXOffset((screenWidth - MAX_WIDTH) / 2);
-                    for (int j = 0; j < i; j++) {
-                        WallPair wallPair = mWallPairs.get(i - j - 1);
-                        wallPair.initialiseWallPair(
-                                mWallPairs.get(i - j).getDirection(),
-                                mWallPairs.get(i - j).getLeftEdge(),
-                                wallPair.getTop() + WALL_HEIGHT);
+            if (mWallPairs.size() == 0) {
+                // If no walls, create wall set.
+                int i;
+                for (i = 0; i < Utilities.NUMBER_OF_WALLS - 1; i++) {
+                    int top = screenHeight - WALL_HEIGHT * i;
+                    // Create wall pairs
+                    mWallPairs.add(new WallPair(new Random().nextBoolean(), 0, top));
+                    // Get wall that would be at FAB height.
+                    int wallPairTop = mWallPairs.get(i).getTop();
+                    if (wallPairTop < FAB_Y && (wallPairTop + WALL_HEIGHT) > FAB_Y) {
+                        // Set that wall pair to horizontal centre.
+                        mWallPairs.get(i).setXOffset((screenWidth - MAX_WIDTH) / 2);
+                        for (int j = 0; j < i; j++) {
+                            // Reset previously generated walls to be offset to centre pair.
+                            WallPair wallPair = mWallPairs.get(i - j - 1);
+                            wallPair.initialiseWallPair(
+                                    mWallPairs.get(i - j).getDirection(),
+                                    mWallPairs.get(i - j).getLeftEdge(),
+                                    wallPair.getTop() + WALL_HEIGHT);
+                        }
+                        break;
                     }
-                    break;
                 }
-            }
-            for (int k = i; k < Utilities.NUMBER_OF_WALLS - 1; k++) {
-                mWallPairs.add(new WallPair(mWallPairs.get(k).getDirection(),
-                        mWallPairs.get(k).getLeftEdge(),
-                        mWallPairs.get(k).getTop()));
+                // All new walls are offset according to centre wall pair.
+                for (int k = i; k < Utilities.NUMBER_OF_WALLS - 1; k++) {
+                    mWallPairs.add(new WallPair(mWallPairs.get(k).getDirection(),
+                            mWallPairs.get(k).getLeftEdge(),
+                            mWallPairs.get(k).getTop()));
+                }
+            } else {
+                int offset = 0;
+                // Get pair inline with FAB, and calculate the offset needed to align to centre.
+                for (WallPair wallPair : mWallPairs) {
+                    if (wallPair.getTop() < FAB_Y && (wallPair.getBottom()) > FAB_Y) {
+                        offset = (screenWidth - MAX_WIDTH) / 2 - wallPair.getLeftEdge();
+                        break;
+                    }
+                }
+                // Offset all wall pairs. Game is now centred and ready to start again.
+                for (WallPair wallPair : mWallPairs) {
+                    wallPair.updatePosition(offset, 0);
+                }
             }
         }
     }
@@ -479,8 +494,32 @@ public class GameLoop extends Thread {
         canvas.drawColor(mColour);
 
         if (mMode == STATE_STARTING) {
-            // Animate wall pairs in
+//            // Animate wall pairs in.
+//
+//            // If first run, generate some walls, centred around FAB.
+//
+//            // Animate walls in.
+//            // Change colour:
+//
+//            long now = System.currentTimeMillis();
+//            double elapsed = (now - mLastTime) / 500.0;
+//            diff += (int) (elapsed * 100);
+//            double range = 500.0;
+//
+//            double ratio = diff / range; // goes from 1 to 0
+//            Log.d(LOG_TAG, "diff = " + diff + ", ratio = " + ratio);
+//            if (ratio > 1) {
             setState(STATE_RUNNING);
+//                return;
+//            }
+//            int red = interpolate(ratio, Color.red(mWallColour), Color.red(mColour));
+//            int green = interpolate(ratio, Color.green(mWallColour), Color.green(mColour));
+//            int blue = interpolate(ratio, Color.blue(mWallColour), Color.blue(mColour));
+////            int alpha =
+//
+////            mLinePaint.setColor(Color.argb(alpha, red, green, blue));
+//
+//            mLastTime = now;
         }
 
         // Sort by elevation (lowest walls drawn first).
