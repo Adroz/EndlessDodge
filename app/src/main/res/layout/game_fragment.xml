@@ -6,43 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivityFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical|center_horizontal"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="WORLD"
-            android:textAppearance="@android:style/TextAppearance.Large"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="173"
-            android:textSize="40sp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="PB"
-            android:textAppearance="@android:style/TextAppearance.Large"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="53"
-            android:textSize="40sp"/>
-
-    </LinearLayout>
-
-    <!--<TextView-->
-        <!--android:id="@+id/test_text"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:elevation="10dp"-->
-        <!--android:gravity="center_horizontal|center_vertical"-->
-        <!--android:text="Hello World"-->
-        <!--android:textSize="26sp" />-->
 
     <FrameLayout
         android:id="@+id/toolbar_bg"
@@ -84,42 +47,108 @@
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:animateLayoutChanges="true" />
 
-    <View
-        android:id="@+id/temp_bg"
+    <LinearLayout
+        android:id="@+id/alt_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="3dp"
-        tools:background="@android:color/holo_orange_light" />
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="vertical"
+        tools:background="@android:color/holo_orange_light">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ScoreFormat"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingEnd="16dp"
+                android:paddingStart="0dp"
+                android:text="WORLD"
+                android:textAppearance="@android:style/TextAppearance.Large" />
+
+            <TextView
+                style="@style/ScoreFormat"
+                android:layout_height="wrap_content"
+                android:paddingEnd="0dp"
+                android:paddingStart="16dp"
+                android:text="YOU"
+                android:textAppearance="@android:style/TextAppearance.Large" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/ScoreFormat"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:paddingEnd="16dp"
+                android:paddingStart="0dp"
+                android:text="@string/number_zero"
+                android:textSize="40sp"
+                tools:text="173" />
+
+            <TextView
+                style="@style/ScoreFormat"
+                android:layout_height="wrap_content"
+                android:paddingEnd="0dp"
+                android:paddingStart="16dp"
+                android:text="@string/number_zero"
+                android:textSize="40sp"
+                tools:text="53" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/personal_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="150sp"
+            tools:text="28" />
+
+    </LinearLayout>
+
+    <!--<View-->
+    <!--android:id="@+id/temp_bg"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:elevation="3dp"-->
+    <!--tools:background="@android:color/holo_orange_light" />-->
 
 
     <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:orientation="horizontal"-->
-        <!--android:elevation="10dp"-->
-        <!--android:gravity="bottom">-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:orientation="horizontal"-->
+    <!--android:elevation="10dp"-->
+    <!--android:gravity="bottom">-->
 
-        <!--<TextView-->
-            <!--android:id="@+id/x_value"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:text="X Value: "-->
-            <!--android:textSize="20sp" />-->
-        <!--<TextView-->
-            <!--android:id="@+id/y_value"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:text="Y Value: "-->
-            <!--android:textSize="20sp" />-->
-        <!--<TextView-->
-            <!--android:id="@+id/z_value"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:text="Z Value: "-->
-            <!--android:textSize="20sp" />-->
+    <!--<TextView-->
+    <!--android:id="@+id/x_value"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_weight="1"-->
+    <!--android:text="X Value: "-->
+    <!--android:textSize="20sp" />-->
+    <!--<TextView-->
+    <!--android:id="@+id/y_value"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_weight="1"-->
+    <!--android:text="Y Value: "-->
+    <!--android:textSize="20sp" />-->
+    <!--<TextView-->
+    <!--android:id="@+id/z_value"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_weight="1"-->
+    <!--android:text="Z Value: "-->
+    <!--android:textSize="20sp" />-->
     <!--</LinearLayout>-->
 
 </io.codetail.widget.RevealFrameLayout>

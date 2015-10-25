@@ -21,8 +21,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.daimajia.easing.Glider;
@@ -72,9 +74,11 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
     private FloatingActionButton mFab;
     private View mTempToolbar;
-    private View mTempBackground;
+    private LinearLayout mAltBackground;
     private View mToolbarView;
     private Toolbar mToolbar;
+
+    private TextView mPersonalScore;
 
     private TextView xValue;
     private TextView yValue;
@@ -133,7 +137,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mToolbarView = view.findViewById(R.id.toolbar_bg);
         mToolbarView.setMinimumHeight(actionBarHeight + statusBarHeight);
 
-        mTempBackground = view.findViewById(R.id.temp_bg);
+        mAltBackground = (LinearLayout) view.findViewById(R.id.alt_background);
+
+        mPersonalScore = (TextView) view.findViewById(R.id.personal_score);
+        mPersonalScore.setText("0");
 
         // GameView, extends SurfaceView to provide game animations and logic.
         mGameView = (GameView) view.findViewById(R.id.game_view);
@@ -214,12 +221,12 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
             }
         });
 
-        mTempBackground.post(new Runnable() {
+        mAltBackground.post(new Runnable() {
             @Override
             public void run() {
                 // Get the final radius for the clipping circle
-                maxBackgroundSize = Math.max(mTempBackground.getWidth(), mTempBackground.getHeight());
-                statusBarOffset = screenHeight - mTempBackground.getHeight();
+                maxBackgroundSize = Math.max(mAltBackground.getWidth(), mAltBackground.getHeight());
+                statusBarOffset = screenHeight - mAltBackground.getHeight();
                 fabEndLocation[1] -= statusBarOffset; // Doesn't matter what view finishes first.
             }
         });
@@ -238,7 +245,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         // Set View colours
         mGameLoop.setColour(colourSet.primarySet);
         setToolbarColour(colourSet.primaryColourDark);
-        mTempBackground.setBackgroundColor(colourSet.primaryColour);
+        mAltBackground.setBackgroundColor(colourSet.primaryColour);
         mTempToolbar.setBackgroundColor(colourSet.primaryColourDark);
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
     }
@@ -284,22 +291,9 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         });
         mFab.startAnimation(animation);
 
-        mTempToolbar.setVisibility(View.INVISIBLE);
-        mTempBackground.setVisibility(View.INVISIBLE);
+        animateBackgroundFade(mAltBackground, colourSet.secondaryColour);
 
-        // TODO: Implement this.
-//        Animation animFadeOut = AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out);
-//        animFadeOut.setDuration(500);
-//        mTempToolbar.animate().alpha(0).setDuration(500).setListener(new AnimatorListenerAdapter() {
-//            @Override
-//            public void onAnimationEnd(Animator animation) {
-//                mTempToolbar.setVisibility(View.INVISIBLE);
-//                super.onAnimationEnd(animation);
-//            }
-//        });
-
-        mTempToolbar.setBackgroundColor(colourSet.secondaryColourDark);
-        mTempBackground.setBackgroundColor(colourSet.secondaryColour);
+        animateBackgroundFade(mTempToolbar, colourSet.secondaryColourDark);
     }
 
     private void onGamePause() {
@@ -309,6 +303,9 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onGameStop() {
         Log.v(LOG_TAG, "onGameStop, game reset.");
 
+        // Set score.
+        mPersonalScore.setText(String.valueOf(mGameLoop.getCurrentScore()));
+
         // TODO: Fix Me
         mGameLoop.setState(GameLoop.STATE_END);
 
@@ -317,7 +314,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         // Start the reveal animations for background and toolbar.
         animationFlag = false;  // Reset animation flag.
-        animateBackgroundReveal(mTempBackground).start();
+        animateBackgroundReveal(mAltBackground).start();
         animateBackgroundReveal(mTempToolbar).start();
 
         // Modify FAB: make invisible, reset the animation, and change colour.
@@ -326,6 +323,30 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
 
         mFab.setOnClickListener(this);
+    }
+
+    private void animateBackgroundFade(final View view, final int colour) {
+        AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
+        alphaAnimation.setDuration(START_ANIMATION_SPEED);
+        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setVisibility(View.INVISIBLE);
+                view.setBackgroundColor(colour);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        view.startAnimation(alphaAnimation);
+//        return alphaAnimation;
     }
 
     private SupportAnimator animateBackgroundReveal(final View view) {

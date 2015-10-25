@@ -499,6 +499,10 @@ public class GameLoop extends Thread {
 //        mHandler.sendMessage(msg);
     }
 
+    public int getCurrentScore(){
+        return mCurrentScore;
+    }
+
     /**
      * The method for drawing each frame of the SurfaceView-GameLoop. Draws background and every
      * wall pair, along with their shadows.
@@ -623,6 +627,8 @@ public class GameLoop extends Thread {
         // Remove wall pairs from list if they've passed through the bottom of the screen.
         while (mWallPairs.get(0).getTop() > screenHeight) {
             mWallPairs.remove(0);
+            // Add to score:
+            mCurrentScore += 1;
         }
         // Add new wall pairs to list if the top pair has just entered the top of the screen.
         WallPair wallPair = mWallPairs.get(mWallPairs.size() - 1);
