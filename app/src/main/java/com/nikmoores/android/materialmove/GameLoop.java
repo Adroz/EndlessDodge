@@ -3,9 +3,11 @@ package com.nikmoores.android.materialmove;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -139,6 +141,21 @@ public class GameLoop extends Thread {
     private RectF mScratchRect;
 
     /**
+     * Fade-in state.
+     */
+    private static double alphaFadeState = 0;
+
+    /**
+     * Temporary bitmap used with secondary canvas.
+     */
+    Bitmap tempBmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+
+    /**
+     * Secondary canvas.
+     */
+    Canvas tempCanvas = new Canvas();
+
+    /**
      * The game's background colour. Colour changes on each play through.
      */
     private int mColour = 0xFFFFFFFF;
@@ -222,7 +239,7 @@ public class GameLoop extends Thread {
                     //
                     // If mRun has been toggled false, inhibit canvas operations.
                     synchronized (mRunLock) {
-                        if (mRun) doDraw(c);
+                        if (mRun) doDraw(c);            // TODO: Don't draw frames if the screen is off.
                     }
                 }
             } finally {
@@ -272,11 +289,12 @@ public class GameLoop extends Thread {
      */
     public void doReset() {
         synchronized (mSurfaceHolder) {
+            Log.v(LOG_TAG, "doReset called.");
             mCurrentScore = 0;
             mX = 0;
             mY = 0;
             mDX = 0;
-            diff = 0;   // FIXME: 04/10/2015 Temp value.
+            alphaFadeState = 0;
             if (mWallPairs.size() == 0) {
                 // If no walls, create wall set.
                 int i;
@@ -487,66 +505,61 @@ public class GameLoop extends Thread {
      *
      * @param canvas The canvas to draw to.
      */
-    int diff = 0;
-
     private void doDraw(Canvas canvas) {
-        // Draw background.
-        canvas.drawColor(mColour);
+//        Log.d(LOG_TAG, "drawing frame");
+        if (tempBmp.isRecycled() || tempBmp.getWidth() != canvas.getWidth() || tempBmp.getHeight() != canvas.getHeight()) {
+            tempBmp.recycle();
+            tempBmp = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
+            tempCanvas.setBitmap(tempBmp);
+        }
+        tempCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
         if (mMode == STATE_STARTING) {
-//            // Animate wall pairs in.
-//
-//            // If first run, generate some walls, centred around FAB.
-//
-//            // Animate walls in.
-//            // Change colour:
-//
-//            long now = System.currentTimeMillis();
-//            double elapsed = (now - mLastTime) / 500.0;
-//            diff += (int) (elapsed * 100);
-//            double range = 500.0;
-//
-//            double ratio = diff / range; // goes from 1 to 0
-//            Log.d(LOG_TAG, "diff = " + diff + ", ratio = " + ratio);
-//            if (ratio > 1) {
-            setState(STATE_RUNNING);
-//                return;
-//            }
-//            int red = interpolate(ratio, Color.red(mWallColour), Color.red(mColour));
-//            int green = interpolate(ratio, Color.green(mWallColour), Color.green(mColour));
-//            int blue = interpolate(ratio, Color.blue(mWallColour), Color.blue(mColour));
-////            int alpha =
-//
-////            mLinePaint.setColor(Color.argb(alpha, red, green, blue));
-//
-//            mLastTime = now;
+            // Animate wall pairs in.
+            long now = System.currentTimeMillis();
+            if (mLastTime > now) return;
+            double elapsed = (now - mLastTime) / 500.0;
+
+            // Animate walls in, start by changing their colour.
+            alphaFadeState += elapsed * 150;
+            if ((int) Math.round(alphaFadeState) >= 255) {
+                setState(STATE_RUNNING);
+                alphaFadeState = 255;
+                mLinePaint.setAlpha(255);
+                return;
+            }
+            mLastTime = now;
         }
+        mLinePaint.setAlpha((int) Math.round(alphaFadeState));
+
+        // Draw background.
+        tempCanvas.drawColor(mColour);
 
         // Sort by elevation (lowest walls drawn first).
         Collections.sort(mWallPairs, getComparator(ELEVATION_SORT));
 
         // Draw walls.
         for (WallPair wallPair : mWallPairs) {
-//            mLinePaint.setColor(mColourSet[wallPair.getElevation()]);
             RectF scratchRect = wallPair.getRect(WallPair.LEFT_WALL);
             if (!scratchRect.isEmpty()) {
-                canvas.drawRect(scratchRect, mLinePaint);
-                drawRectShadow(
-                        canvas,
-                        true,
-                        wallPair.getLeftWallDimensions(),
-                        wallPair.getElevation());
+                tempCanvas.drawRect(scratchRect, mLinePaint);
+//                drawRectShadow(
+//                        canvas,
+//                        true,
+//                        wallPair.getLeftWallDimensions(),
+//                        wallPair.getElevation());
             }
             scratchRect = wallPair.getRect(WallPair.RIGHT_WALL);
             if (!scratchRect.isEmpty()) {
-                canvas.drawRect(scratchRect, mLinePaint);
-                drawRectShadow(
-                        canvas,
-                        false,
-                        wallPair.getRightWallDimensions(),
-                        wallPair.getElevation());
+                tempCanvas.drawRect(scratchRect, mLinePaint);
+//                drawRectShadow(
+//                        canvas,
+//                        false,
+//                        wallPair.getRightWallDimensions(),
+//                        wallPair.getElevation());
             }
         }
+        canvas.drawBitmap(tempBmp, 0, 0, null);
     }
 
     /**
@@ -588,8 +601,8 @@ public class GameLoop extends Thread {
         // ---- COLLISION DETECTION ----
         // First check if any wall pairs are in line with the FAB.
         for (WallPair wallPair : mWallPairs) {
-            Log.d(LOG_TAG, wallPair.toString());
-            Log.d(LOG_TAG, "FAB top = " + (mFabData[1] - mFabData[2]));
+//            Log.d(LOG_TAG, wallPair.toString());
+//            Log.d(LOG_TAG, "FAB top = " + (mFabData[1] - mFabData[2]));
             if ((wallPair.getBottom() > mFabData[1] - mFabData[2])
                     && wallPair.getTop() < mFabData[1] + mFabData[2]) {
                 // Then check if either wall's inner edge is crossing the FAB
@@ -608,7 +621,7 @@ public class GameLoop extends Thread {
         Collections.sort(mWallPairs, descending(getComparator(TOP_SORT)));
 
         // Remove wall pairs from list if they've passed through the bottom of the screen.
-        while (mWallPairs.get(0).getTop() > screenHeight) {  // TODO: Might end up with issues of canvasHeight vs screenHeight...
+        while (mWallPairs.get(0).getTop() > screenHeight) {
             mWallPairs.remove(0);
         }
         // Add new wall pairs to list if the top pair has just entered the top of the screen.

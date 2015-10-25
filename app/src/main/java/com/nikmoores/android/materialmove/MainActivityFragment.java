@@ -44,7 +44,7 @@ import static com.nikmoores.android.materialmove.Utilities.screenWidth;
  */
 public class MainActivityFragment extends Fragment implements View.OnClickListener, SensorEventListener {
 
-    final String LOG_TAG = MainActivity.class.getSimpleName();
+    final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     /*
      *Animation constants
@@ -179,6 +179,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         Log.v(LOG_TAG, "onPause called.");
         // When Fragment is paused, pause game.
         mGameView.getThread().pause();
+        mGameLoop.pause();
         super.onPause();
     }
 
@@ -253,7 +254,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         // Disable FAB while the game is running. // TODO: Still need to clean this up, button is not in centre.
         mFab.setOnClickListener(null);
 
-        // TODO: Fix this so I can support API 16.
+        // TODO: Fix this so I can support API 16. (1/2)
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
         // TODO: Possibly add colour change animation - make FAB start as a 500 colour (darker).
@@ -324,9 +325,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.clearAnimation();
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
 
-        // Unlock screen rotation.
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-
         mFab.setOnClickListener(this);
     }
 
@@ -354,6 +352,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                     mGameLoop.setState(GameLoop.STATE_READY);
                     mGameLoop.setColour(colourSet.primarySet);
                     setToolbarColour(colourSet.primaryColourDark);
+                    // Unlock screen rotation. // TODO: Fix this so I can support API 16. (2/2)
+                    getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 }
                 animationFlag = true;
             }
