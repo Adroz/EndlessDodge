@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivityFragment">
 
-
     <FrameLayout
         android:id="@+id/toolbar_bg"
         android:layout_width="match_parent"
@@ -33,7 +32,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <com.nikmoores.android.materialmove.GameView
+    <com.nikmoores.android.endlessdodge.GameView
         android:id="@+id/game_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -108,6 +107,7 @@
             android:id="@+id/personal_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
             android:textSize="150sp"
             tools:text="28" />
 
