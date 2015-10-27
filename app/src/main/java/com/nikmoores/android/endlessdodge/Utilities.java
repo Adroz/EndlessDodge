@@ -1,4 +1,4 @@
-package com.nikmoores.android.materialmove;
+package com.nikmoores.android.endlessdodge;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -20,7 +20,7 @@ public class Utilities {
     static final String LOG_TAG = Utilities.class.getSimpleName();
 
     /* Intent Constants */
-    public static final String INTENT_FILTER = "com.nikmoores.android.materialmove.INTENT_FILTER";
+    public static final String INTENT_FILTER = "com.nikmoores.android.endlessdodge.INTENT_FILTER";
     public static final String STATE_KEY = "state";
 
     /* Colour location constants */

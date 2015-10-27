@@ -1,4 +1,4 @@
-package com.nikmoores.android.materialmove;
+package com.nikmoores.android.endlessdodge;
 
 import android.content.Context;
 import android.os.Handler;

@@ -5,7 +5,7 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        applicationId "com.nikmoores.android.materialmove"
+        applicationId "com.nikmoores.android.endlessdodge"
         minSdkVersion 18
         targetSdkVersion 23
         versionCode 1

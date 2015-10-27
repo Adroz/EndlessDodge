@@ -1,4 +1,4 @@
-package com.nikmoores.android.materialmove;
+package com.nikmoores.android.endlessdodge;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

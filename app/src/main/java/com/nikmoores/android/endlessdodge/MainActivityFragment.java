@@ -1,4 +1,4 @@
-package com.nikmoores.android.materialmove;
+package com.nikmoores.android.endlessdodge;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -38,8 +38,8 @@ import java.util.Random;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
 
-import static com.nikmoores.android.materialmove.Utilities.screenHeight;
-import static com.nikmoores.android.materialmove.Utilities.screenWidth;
+import static com.nikmoores.android.endlessdodge.Utilities.screenHeight;
+import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
 
 /**
  * A placeholder fragment containing a simple view.

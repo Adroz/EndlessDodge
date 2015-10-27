@@ -1,4 +1,4 @@
-package com.nikmoores.android.materialmove;
+package com.nikmoores.android.endlessdodge;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,18 +21,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import static com.nikmoores.android.materialmove.Utilities.FAB_Y;
-import static com.nikmoores.android.materialmove.Utilities.MAX_WIDTH;
-import static com.nikmoores.android.materialmove.Utilities.PHYS_X_ACCEL_SEC;
-import static com.nikmoores.android.materialmove.Utilities.PHYS_X_MAX_SPEED;
-import static com.nikmoores.android.materialmove.Utilities.SCROLLING_Y_SPEED;
-import static com.nikmoores.android.materialmove.Utilities.WALL_HEIGHT;
-import static com.nikmoores.android.materialmove.Utilities.screenHeight;
-import static com.nikmoores.android.materialmove.Utilities.screenWidth;
-import static com.nikmoores.android.materialmove.WallPairComparator.ELEVATION_SORT;
-import static com.nikmoores.android.materialmove.WallPairComparator.TOP_SORT;
-import static com.nikmoores.android.materialmove.WallPairComparator.descending;
-import static com.nikmoores.android.materialmove.WallPairComparator.getComparator;
+import static com.nikmoores.android.endlessdodge.Utilities.FAB_Y;
+import static com.nikmoores.android.endlessdodge.Utilities.MAX_WIDTH;
+import static com.nikmoores.android.endlessdodge.Utilities.PHYS_X_ACCEL_SEC;
+import static com.nikmoores.android.endlessdodge.Utilities.PHYS_X_MAX_SPEED;
+import static com.nikmoores.android.endlessdodge.Utilities.SCROLLING_Y_SPEED;
+import static com.nikmoores.android.endlessdodge.Utilities.WALL_HEIGHT;
+import static com.nikmoores.android.endlessdodge.Utilities.screenHeight;
+import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
+import static com.nikmoores.android.endlessdodge.WallPairComparator.ELEVATION_SORT;
+import static com.nikmoores.android.endlessdodge.WallPairComparator.TOP_SORT;
+import static com.nikmoores.android.endlessdodge.WallPairComparator.descending;
+import static com.nikmoores.android.endlessdodge.WallPairComparator.getComparator;
 
 /**
  * Created by Nik on 24/09/2015.

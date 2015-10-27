@@ -1,4 +1,4 @@
-package com.nikmoores.android.materialmove;
+package com.nikmoores.android.endlessdodge;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

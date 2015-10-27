@@ -1,17 +1,17 @@
-package com.nikmoores.android.materialmove;
+package com.nikmoores.android.endlessdodge;
 
 import android.graphics.RectF;
 
 import java.util.Random;
 
-import static com.nikmoores.android.materialmove.Utilities.FAB_RADIUS;
-import static com.nikmoores.android.materialmove.Utilities.MAX_ELEVATION;
-import static com.nikmoores.android.materialmove.Utilities.MAX_WIDTH;
-import static com.nikmoores.android.materialmove.Utilities.MIN_ELEVATION;
-import static com.nikmoores.android.materialmove.Utilities.MIN_HEIGHT;
-import static com.nikmoores.android.materialmove.Utilities.WALL_HEIGHT;
-import static com.nikmoores.android.materialmove.Utilities.WALL_WIDTH;
-import static com.nikmoores.android.materialmove.Utilities.screenWidth;
+import static com.nikmoores.android.endlessdodge.Utilities.FAB_RADIUS;
+import static com.nikmoores.android.endlessdodge.Utilities.MAX_ELEVATION;
+import static com.nikmoores.android.endlessdodge.Utilities.MAX_WIDTH;
+import static com.nikmoores.android.endlessdodge.Utilities.MIN_ELEVATION;
+import static com.nikmoores.android.endlessdodge.Utilities.MIN_HEIGHT;
+import static com.nikmoores.android.endlessdodge.Utilities.WALL_HEIGHT;
+import static com.nikmoores.android.endlessdodge.Utilities.WALL_WIDTH;
+import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
 
 /**
  * Created by Nik on 24/09/2015.
