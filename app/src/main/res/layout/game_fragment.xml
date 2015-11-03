@@ -66,15 +66,16 @@
                 android:gravity="end"
                 android:paddingEnd="16dp"
                 android:paddingStart="0dp"
-                android:text="WORLD"
+                android:text="WB"
                 android:textAppearance="@android:style/TextAppearance.Large" />
 
             <TextView
+                android:id="@+id/player_name"
                 style="@style/ScoreFormat"
                 android:layout_height="wrap_content"
                 android:paddingEnd="0dp"
                 android:paddingStart="16dp"
-                android:text="YOU"
+                android:text="PB"
                 android:textAppearance="@android:style/TextAppearance.Large" />
         </LinearLayout>
 

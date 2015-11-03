@@ -81,6 +81,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private View mToolbarView;
     private Toolbar mToolbar;
 
+    private TextView mPlayerName;
     private TextView mWorldScore;
     private TextView mUserScore;
     private TextView mCurrentScore;
@@ -154,6 +155,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         mAltBackground = (LinearLayout) view.findViewById(R.id.alt_background);
 
+        mPlayerName = (TextView) view.findViewById(R.id.player_name);
         mWorldScore = (TextView) view.findViewById(R.id.world_score);
         mUserScore = (TextView) view.findViewById(R.id.user_score);
         mCurrentScore = (TextView) view.findViewById(R.id.current_score);
@@ -271,6 +273,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
     }
 
+    public void setPlayerName(String playerName) {
+        mPlayerName.setText(playerName);
+    }
+
     private void onGameStart() {
         Log.v(LOG_TAG, "onGameStart, game started.");
 
@@ -324,12 +330,14 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onGameStop() {
         Log.v(LOG_TAG, "onGameStop, game reset.");
 
+        int finalScore = mGameLoop.getCurrentScore();
+
         // TODO: Fix Me
         mGameLoop.setState(GameLoop.STATE_END);
 
         // Set score.
         // TODO: Fix me
-        mListener.updateLeaderboards(mGameLoop.getCurrentScore());
+        mListener.updateLeaderboards(finalScore);
 
         // Generate new colours as the FAB will get a new colour.
         colourSet.setGameColours();
@@ -348,6 +356,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     }
 
     public void updateScoreViews(int view, float score) {
+        Log.d(LOG_TAG, "Updating score (" + view + "): " + score);
         TextView textView = mCurrentScore;
         if (view == WORLD_SCORE) {
             textView = mWorldScore;

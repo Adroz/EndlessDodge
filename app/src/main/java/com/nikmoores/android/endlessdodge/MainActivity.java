@@ -1,7 +1,9 @@
 package com.nikmoores.android.endlessdodge;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,7 +15,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.Games;
-import com.google.android.gms.games.Player;
 import com.google.android.gms.games.leaderboard.LeaderboardScore;
 import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 import com.google.android.gms.games.leaderboard.Leaderboards;
@@ -33,9 +34,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private Menu menu;
 
-    private float mLocalWorldBestScore;
-    private float mLocalBestScore;
-    private float mLocalCurrentScore;
+    public static final String WORLD_BEST = "WB";
+    public static final String PERSONAL_BEST = "PB";
+    public static final String LAST_SCORE = "last_score";
+
+    SharedPreferences preferences;
 
     // Client used to interact with Google APIs
     private GoogleApiClient mGoogleApiClient;
@@ -60,10 +63,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     // (waiting for the user to sign in, for instance)
     Outbox mOutbox = new Outbox();
 
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        preferences = getPreferences(Context.MODE_PRIVATE);
+//        preferences = getSharedPreferences(PREFS_DATA, Context.MODE_PRIVATE);
+//        editor = preferences.edit();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -76,9 +85,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // Create fragment and listen
         mMainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
         mMainActivityFragment.setListener(this);
-
-        // load outbox from file
-        mOutbox.loadLocal(this);
     }
 
     @Override
@@ -138,6 +144,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // load outbox from file
+        mOutbox.loadLocal();
+        updateLeaderboards(mOutbox.mScore);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mOutbox.saveLocal();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == RC_SIGN_IN) {
@@ -159,30 +179,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // Show sign-out button on main menu
         hideMenuItem(R.id.menu_sign_in);
         showMenuItem(R.id.menu_sign_out);
-//        mMainMenuFragment.setShowSignInButton(false);
-
-        // Show "you are signed in" message on win screen, with no sign in button.
-//        mWinFragment.setShowSignInButton(false);
 
         // Set the greeting appropriately on main menu
-        Player p = Games.Players.getCurrentPlayer(mGoogleApiClient);
-        String displayName;
-        if (p == null) {
-            Log.w(LOG_TAG, "mGamesClient.getCurrentPlayer() is NULL!");
-            displayName = "You";
-        } else {
-            displayName = p.getDisplayName();
-        }
-        // TODO: Use the name in the fragment XML file.
-//        mMainMenuFragment.setGreeting("Hello, " + displayName);
-        // TODO: Set Leaderboard scores.
-
+//        Player p = Games.Players.getCurrentPlayer(mGoogleApiClient);
+//        String displayName;
+//        if (p == null) {
+//            Log.w(LOG_TAG, "mGamesClient.getCurrentPlayer() is NULL!");
+//            displayName = "You";
+//        } else {
+//            displayName = p.getDisplayName();
+//        }
+//        mMainActivityFragment.setPlayerName(displayName.toUpperCase());
 
         // if we have accomplishments to push, push them
         if (!mOutbox.isEmpty()) {
             pushAccomplishments();
-//            Toast.makeText(this, getString(R.string.your_progress_will_be_uploaded),
-//                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -226,19 +237,75 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void updateLeaderboards(int score) {
         mOutbox.mScore = score;
-        pushAccomplishments();
+        mMainActivityFragment.updateScoreViews(CURRENT_SCORE, (float) mOutbox.mScore);
+
+        if (mOutbox.mScore > mOutbox.mBest) {
+            mOutbox.mBest = mOutbox.mScore;
+            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
+        }
+        if (mOutbox.mScore > mOutbox.mWorldBest) {
+            mOutbox.mWorldBest = mOutbox.mScore;
+            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mWorldBest);
+        }
+
+        if (!isSignedIn()) {
+            mOutbox.saveLocal();
+            return;
+        }
+        // Submit current score
+        Games.Leaderboards.submitScore(
+                mGoogleApiClient,
+                getString(R.string.leaderboard_leaderboard),
+                mOutbox.mScore);
+
+        // Update user best score.
+        Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient,
+                getString(R.string.leaderboard_leaderboard),
+                LeaderboardVariant.TIME_SPAN_ALL_TIME,
+                LeaderboardVariant.COLLECTION_PUBLIC)
+                .setResultCallback(new ResultCallback<Leaderboards.LoadPlayerScoreResult>() {
+
+                    @Override
+                    public void onResult(Leaderboards.LoadPlayerScoreResult arg0) {
+                        LeaderboardScore c = arg0.getScore();
+                        if (c.getRawScore() > mOutbox.mBest) {
+                            mOutbox.mBest = c.getRawScore();
+                            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
+                            mOutbox.saveLocal();
+                        }
+                    }
+
+                });
+
+        // Update to world best.
+        Games.Leaderboards.loadTopScores(mGoogleApiClient,
+                getString(R.string.leaderboard_leaderboard),
+                LeaderboardVariant.TIME_SPAN_ALL_TIME,
+                LeaderboardVariant.COLLECTION_PUBLIC,
+                1).setResultCallback(new ResultCallback<Leaderboards.LoadScoresResult>() {
+            @Override
+            public void onResult(Leaderboards.LoadScoresResult loadScoresResult) {
+                float topScore = loadScoresResult.getScores().get(0).getRawScore();
+                if (topScore > mOutbox.mWorldBest) {
+                    mOutbox.mWorldBest = topScore;
+                    mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest);
+                    mOutbox.saveLocal();
+                }
+            }
+        });
+        mOutbox.saveLocal();
     }
 
     void pushAccomplishments() {
         if (!isSignedIn()) {
             // can't push to the cloud, so save locally
-            mOutbox.saveLocal(this);
+            mOutbox.saveLocal();
             return;
         }
-//        if (mOutbox.mPrimeAchievement) {
-//            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_prime));
-//            mOutbox.mPrimeAchievement = false;
-//        }
+        if (mOutbox.mPrimeAchievement) {
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_prime));
+            mOutbox.mPrimeAchievement = false;
+        }
 //        if (mOutbox.mArrogantAchievement) {
 //            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_arrogant));
 //            mOutbox.mArrogantAchievement = false;
@@ -257,62 +324,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //            Games.Achievements.increment(mGoogleApiClient, getString(R.string.achievement_bored),
 //                    mOutbox.mBoredSteps);
 //        }
-        if (mOutbox.mScore >= 0) {
-            // Submit current score
-            Games.Leaderboards.submitScore(
-                    mGoogleApiClient,
-                    getString(R.string.leaderboard_leaderboard),
-                    mOutbox.mScore);
-
-            mMainActivityFragment.updateScoreViews(CURRENT_SCORE, mOutbox.mScore);
-            if (mOutbox.mScore > mLocalBestScore) {
-                mLocalBestScore = mOutbox.mScore;
-                mMainActivityFragment.updateScoreViews(USER_SCORE, mLocalBestScore);
-            }
-            if (mOutbox.mScore > mLocalWorldBestScore) {
-                mLocalWorldBestScore = mOutbox.mScore;
-                mMainActivityFragment.updateScoreViews(USER_SCORE, mLocalWorldBestScore);
-            }
-
-            // Update user best score.
-            Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient,
-                    getString(R.string.leaderboard_leaderboard),
-                    LeaderboardVariant.TIME_SPAN_ALL_TIME,
-                    LeaderboardVariant.COLLECTION_PUBLIC)
-                    .setResultCallback(new ResultCallback<Leaderboards.LoadPlayerScoreResult>() {
-
-                        @Override
-                        public void onResult(Leaderboards.LoadPlayerScoreResult arg0) {
-                            LeaderboardScore c = arg0.getScore();
-                            if (c.getRawScore() > mLocalBestScore) {
-                                mLocalBestScore = c.getRawScore();
-                                mMainActivityFragment.updateScoreViews(
-                                        USER_SCORE,
-                                        mLocalBestScore);
-                            }
-                        }
-
-                    });
-            // Update world's best.
-            Games.Leaderboards.loadTopScores(mGoogleApiClient,
-                    getString(R.string.leaderboard_leaderboard),
-                    LeaderboardVariant.TIME_SPAN_ALL_TIME,
-                    LeaderboardVariant.COLLECTION_PUBLIC,
-                    1).setResultCallback(new ResultCallback<Leaderboards.LoadScoresResult>() {
-                @Override
-                public void onResult(Leaderboards.LoadScoresResult loadScoresResult) {
-                    float topScore = loadScoresResult.getScores().get(0).getRawScore();
-                    if (topScore > mLocalWorldBestScore) {
-                        mLocalWorldBestScore = topScore;
-                        mMainActivityFragment.updateScoreViews(
-                                WORLD_SCORE,
-                                mLocalWorldBestScore);
-                    }
-                }
-            });
-            mOutbox.mScore = -1;
-        }
-        mOutbox.saveLocal(this);
     }
 
     class Outbox {
@@ -321,24 +332,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         boolean mLeetAchievement = false;
         boolean mArrogantAchievement = false;
         int mBoredSteps = 0;
-        int mScore = -1;
+        int mScore = 0;
+        float mWorldBest = 0;
+        float mBest = 0;
 
         boolean isEmpty() {
             return !mPrimeAchievement && !mHumbleAchievement && !mLeetAchievement &&
-                    !mArrogantAchievement && mBoredSteps == 0 && mScore < 0;
+                    !mArrogantAchievement && mBoredSteps == 0;
         }
 
-        public void saveLocal(Context ctx) {
-            /* TODO: This is left as an exercise. To make it more difficult to cheat,
-             * this data should be stored in an encrypted file! And remember not to
-             * expose your encryption key (obfuscate it by building it from bits and
-             * pieces and/or XORing with another string, for instance). */
+        public void saveLocal() {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putFloat(WORLD_BEST, mWorldBest)
+                    .putFloat(PERSONAL_BEST, mBest)
+                    .putInt(LAST_SCORE, mScore)
+                    .apply();
         }
 
-        public void loadLocal(Context ctx) {
-            mLocalWorldBestScore = 0;
-            mLocalBestScore = 0;
-            mLocalCurrentScore = 0;
+        public void loadLocal() {
+            mWorldBest = preferences.getFloat(WORLD_BEST, 0);
+            mBest = preferences.getFloat(PERSONAL_BEST, 0);
+            mScore = preferences.getInt(LAST_SCORE, 0);
+            mMainActivityFragment.updateScoreViews(CURRENT_SCORE, mOutbox.mScore);
+            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest);
+            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
         }
     }
 }
