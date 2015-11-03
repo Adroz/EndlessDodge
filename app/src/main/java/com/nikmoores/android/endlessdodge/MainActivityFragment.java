@@ -46,6 +46,9 @@ import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
  */
 public class MainActivityFragment extends Fragment implements View.OnClickListener, SensorEventListener {
 
+    public static final int CURRENT_SCORE = 0;
+    public static final int WORLD_SCORE = 1;
+    public static final int USER_SCORE = 2;
     final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     /*
@@ -78,7 +81,9 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private View mToolbarView;
     private Toolbar mToolbar;
 
-    private TextView mPersonalScore;
+    private TextView mWorldScore;
+    private TextView mUserScore;
+    private TextView mCurrentScore;
 
     private TextView xValue;
     private TextView yValue;
@@ -86,6 +91,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private SensorManager sensorManager = null;
     private int mXValue;
 
+    /**
+     * Best score to date.
+     */
+    private int mBestScore;
 
     /**
      * A handle to the thread that's actually running the animation.
@@ -100,6 +109,12 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public MainActivityFragment() {
 
     }
+
+    public interface Listener {
+        void updateLeaderboards(int score);
+    }
+
+    Listener mListener = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -139,8 +154,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         mAltBackground = (LinearLayout) view.findViewById(R.id.alt_background);
 
-        mPersonalScore = (TextView) view.findViewById(R.id.personal_score);
-        mPersonalScore.setText("0");
+        mWorldScore = (TextView) view.findViewById(R.id.world_score);
+        mUserScore = (TextView) view.findViewById(R.id.user_score);
+        mCurrentScore = (TextView) view.findViewById(R.id.current_score);
+        mCurrentScore.setText("0");
 
         // GameView, extends SurfaceView to provide game animations and logic.
         mGameView = (GameView) view.findViewById(R.id.game_view);
@@ -204,6 +221,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         super.onSaveInstanceState(outState);
         mGameLoop.saveState(outState);
         Log.w(LOG_TAG, "sIS called");
+    }
+
+    public void setListener(Listener l) {
+        mListener = l;
     }
 
     private void initDimensions() {
@@ -303,11 +324,12 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onGameStop() {
         Log.v(LOG_TAG, "onGameStop, game reset.");
 
-        // Set score.
-        mPersonalScore.setText(String.valueOf(mGameLoop.getCurrentScore()));
-
         // TODO: Fix Me
         mGameLoop.setState(GameLoop.STATE_END);
+
+        // Set score.
+        // TODO: Fix me
+        mListener.updateLeaderboards(mGameLoop.getCurrentScore());
 
         // Generate new colours as the FAB will get a new colour.
         colourSet.setGameColours();
@@ -323,6 +345,16 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
 
         mFab.setOnClickListener(this);
+    }
+
+    public void updateScoreViews(int view, float score) {
+        TextView textView = mCurrentScore;
+        if (view == WORLD_SCORE) {
+            textView = mWorldScore;
+        } else if (view == USER_SCORE) {
+            textView = mUserScore;
+        }
+        textView.setText(String.format("%d", (int) score));
     }
 
     private void animateBackgroundFade(final View view, final int colour) {

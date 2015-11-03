@@ -1,1 +1,6 @@
-include ':app'
+include ':app', ':BaseGameUtils'
+
+//keystore = System.getenv("KEYSTORE")
+//keystore_password = System.getenv("KSTOREPWD")
+//key_alias = mykey
+//key_password = keypass

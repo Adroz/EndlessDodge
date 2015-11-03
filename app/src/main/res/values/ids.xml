@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_id">597062410042</string>
+    <string name="package_name">com.nikmoores.android.endlessdodge</string>
+
+    <string name="achievement_prime">CgkIur7FnbAREAIQAQ</string>
+    <string name="achievement_really_bored">CgkIur7FnbAREAIQAg</string>
+    <string name="achievement_bored">CgkIur7FnbAREAIQAw</string>
+    <string name="achievement_humble">CgkIur7FnbAREAIQBA</string>
+    <string name="achievement_arrogant">CgkIur7FnbAREAIQBQ</string>
+    <string name="achievement_leet">CgkIur7FnbAREAIQBg</string>
+    <string name="leaderboard_leaderboard">CgkIur7FnbAREAIQCQ</string>
+
+</resources>

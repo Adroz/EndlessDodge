@@ -2,32 +2,11 @@
 <items version="2" >
 
     <item
-        jar="C:\Users\Nik\.gradle\caches\modules-2\files-2.1\com.nineoldandroids\library\2.4.0\e9b63380f3a242dbdbf103a2355ad7e43bad17cb\library-2.4.0.jar"
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-wearable\8.1.0\jars\classes.jar"
         jumboMode="false"
         revision="23.0.1"
-        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
-        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\library-2.4.0-b31bece378fc4bc9094d1ae45f0cabeb0d256bed.jar" />
-    </item>
-    <item
-        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\design\23.0.1\jars\classes.jar"
-        jumboMode="false"
-        revision="23.0.1"
-        sha1="e5c61a3169221a89654ffcaaed47bba51cf071ad">
-        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-d2633c1803536dfe7c8a135b7c1f6fb45f7dbdb4.jar" />
-    </item>
-    <item
-        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.daimajia.easing\library\1.0.1\jars\classes.jar"
-        jumboMode="false"
-        revision="23.0.1"
-        sha1="d7e947f993bf32a00fcb3078cdda8bb11c930afb">
-        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-7fe2336ae08aa191b9f3b10c18e8924e7f171498.jar" />
-    </item>
-    <item
-        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.0.1\jars\classes.jar"
-        jumboMode="false"
-        revision="23.0.1"
-        sha1="c31e21b53ff2f74664e498248d01453a32e32d48">
-        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-5f28449b1bd947e2b9c19b828b9d9ec079e717ff.jar" />
+        sha1="97f3b099801a9ad9d70e835b9125273e986eb68d">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-2a114720183fd0c6f72a1f14722b55b537a14fc2.jar" />
     </item>
     <item
         jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.github.ozodrukh\CircularReveal\1.1.1\jars\classes.jar"
@@ -37,25 +16,228 @@
         <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-69cc7327969db118ec804ea6bd1e6ea1082c3e05.jar" />
     </item>
     <item
-        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.0.1\jars\classes.jar"
+        jar="C:\Users\Nik\.gradle\caches\modules-2\files-2.1\com.nineoldandroids\library\2.4.0\e9b63380f3a242dbdbf103a2355ad7e43bad17cb\library-2.4.0.jar"
         jumboMode="false"
         revision="23.0.1"
-        sha1="d86429b0f0b3f3cafbeb78dda1b9d89119ccb05d">
-        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-43d2aeee8f073739c0ccf1f24d4ee355ea66212c.jar" />
+        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\library-2.4.0-b31bece378fc4bc9094d1ae45f0cabeb0d256bed.jar" />
     </item>
     <item
-        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.0.1\jars\libs\internal_impl-23.0.1.jar"
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-maps\8.1.0\jars\classes.jar"
         jumboMode="false"
         revision="23.0.1"
-        sha1="aa92916125166649d8ad4ba3940c3dd7515596d3">
-        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\internal_impl-23.0.1-5c986f699b850eaaef645e43efe1ec74151d27a4.jar" />
+        sha1="2a7e47da654546f9457deb6132364f1bf33a1857">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-74015540439d29546cbfd159ea57119838eaae4d.jar" />
     </item>
     <item
-        jar="C:\Program Files (x86)\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\23.0.1\support-annotations-23.0.1.jar"
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-identity\8.1.0\jars\classes.jar"
         jumboMode="false"
         revision="23.0.1"
-        sha1="1fce89a6428c51467090d7f424e4c9c3dbd55f7e">
-        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\support-annotations-23.0.1-d6db97a91f45a5b4eb43a1759ec14893be5c0c98.jar" />
+        sha1="d294caf562c4c678b2ef351662a0ca6f1a4d06c0">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-95a7e51c1522cda5b2b17fdb49a6473366c01c03.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\MaterialMove\BaseGameUtils\unspecified\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="83adc81ffb0dc0a279b21bd792f97b6837dbde0c">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-dd142d56c38dcdc1816a6c6e9d9511178c670516.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-measurement\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="482de223655d06253cc6a4955d653f8994169500">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-4d0bbc6012c7a98dc819e7609ae4e511e115d7fc.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.daimajia.easing\library\1.0.1\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="d7e947f993bf32a00fcb3078cdda8bb11c930afb">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-7fe2336ae08aa191b9f3b10c18e8924e7f171498.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\design\23.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="19026d31f5d3ae868db81319671a642be5fbba08">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-2547b3fb478147374abf92282f14da764a7edc89.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="d0dda274b703dd9c5bb056867649d22b4171ae7d">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-37d88a994270b1c483f27a6c461e556dd6f89874.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-nearby\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="041d93cf0533591c29d1d7263b2fa114dbfb20bd">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-635e43e07b3c51360408a3d27deda7c59cdc4e00.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-ads\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="997773777cf3904c11d6764fe3b7668538220e49">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-87aaa77af65cffa411e8519005d447993055b930.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-gcm\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="dcb5b75baf05d92e61d5706737200ee55949f97b">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-b6edf76a9ec34f1f36a008d60dd1e82e9054712e.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="57ae0d750ff83f0c738d21720224ac7ea866a094">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-393c58fe94e0f1ca74ee983b6357ab6d76846e74.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-appinvite\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="b92002cb2f0e11a226ac5bac6dff1dc2a9d0b774">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-e82bbd21714990cbcda544e181aa19d9e2812362.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-cast\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="3178362320bcf51228835b60ff978efadfd1f783">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-85215a2990f3377c54513dfdd2718bfd2913d5b6.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-drive\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="3c729e6d76a36c5dc27e6a4c4009296f49eaa88a">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-77aeb2d4832bdcd29a45dcc2149091a1c63ecbc8.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\23.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="3f151e49c316a5ab2c065969a3b3b55ef9b393fc">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-f97e67ea199ced19df9bc6551ccc92934e416a3c.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\mediarouter-v7\22.2.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="dcf8c83c3dead00a6c4fe313e95f7aaca20dc641">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-4676b313ac6002bfc5185124d959217d24a9a75b.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-analytics\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="95758a2905669affbffc5ddd262921d375674fad">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-a1a6c4b2d44dcd306843e9313fdedf024e5ae22f.jar" />
+    </item>
+    <item
+        jar="C:\Program Files (x86)\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\23.1.0\support-annotations-23.1.0.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="92e3fc113ec3ee36b64603a38857b95700025633">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\support-annotations-23.1.0-456e1821a9725675cbd5c8201c179499f2a087b4.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-panorama\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="d93480da1d303122ee67dc3bc23e6297bdef9951">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-ca89282ae0f8b2ff00a13d27029cd37adf16b183.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-fitness\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="9cf8c0ef60847621c7ad00b4f78dbfc9daba4af2">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-748d42c9d06a4517322581e2420568f893e70c51.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-location\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="3aed37c38c56679602255dd72ef356da5d327cda">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-19774188aa3d0032b539d142e0677d948be7fc0f.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-vision\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="17449c47df35c754b257532052f1270c444f7993">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-8800981dd415796d0286ebffe5a69e8b320ec74d.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-base\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="82825756edeeb3b56b15e73b2edd56e93da5a444">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-9fc9a26f1a232935f65613d87b207537337ced21.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\mediarouter-v7\22.2.0\jars\libs\internal_impl-22.2.0.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="0632f06970823b7e3436f649bfa65b47035c91d0">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\internal_impl-22.2.0-8ac2affe97b8975c68654f29b3837709550e5b71.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-games\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="993834cb17d07d51b92db89d2c330243592ebf77">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-971e0b2bf7d7f3152e8671cd3622d868669f2da5.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="ddde541c289c8b816a8f8fd6c325d80788c522a6">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-693c74f5af2e27c0f18f8b659b621d6bde73819d.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-plus\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="d61920aba361832a9545a43fa8c9453eb02f18f7">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-0882721c6ff375fb016fae7ba369f197811c8d96.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.1.0\jars\libs\internal_impl-23.1.0.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="8716243bf04bae8d6c9ca94d27b9a9be7236f0a3">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\internal_impl-23.1.0-ff363b683460a1a5d73dc4ff94d48fe90fa3a494.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-wallet\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="325788a04b436a0bccbc5b4c54cf0f12ebdcbd2d">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-67f1434c05e1556e718f568b99def0131e64ff47.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-appindexing\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="4477ea44f5ec5ad064022a22691732d7638ff197">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-6b88b79f7d5803e26a2405f6a2eb531543488928.jar" />
+    </item>
+    <item
+        jar="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-safetynet\8.1.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.1"
+        sha1="3b05c18f60969ecc2ba49c0409c4b96be2d9cb0c">
+        <dex dex="C:\Users\Nik\Google Drive\2. Projects\MaterialMove\app\build\intermediates\pre-dexed\debug\classes-56d0db2d15f4d3134432b12c29f9ea7fa30644ec.jar" />
     </item>
 
 </items>
