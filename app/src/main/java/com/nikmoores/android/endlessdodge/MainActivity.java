@@ -1,6 +1,5 @@
 package com.nikmoores.android.endlessdodge;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,7 +14,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.Games;
-import com.google.android.gms.games.leaderboard.LeaderboardScore;
 import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 import com.google.android.gms.games.leaderboard.Leaderboards;
 import com.google.android.gms.plus.Plus;
@@ -23,10 +21,12 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.CURRENT_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.Listener;
+import static com.nikmoores.android.endlessdodge.MainActivityFragment.SOCIAL_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.USER_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.WORLD_SCORE;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, Listener {
+public class MainActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, Listener {
 
     final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Menu menu;
 
     public static final String WORLD_BEST = "WB";
+    public static final String SOCIAL_BEST = "WB";
     public static final String PERSONAL_BEST = "PB";
     public static final String LAST_SCORE = "last_score";
 
@@ -53,26 +54,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private boolean mAutoStartSignInFlow = true;
 
     // request codes we use when invoking an external activity
-    private static final int RC_RESOLVE = 5000;
-    private static final int RC_UNUSED = 5001;
     private static final int RC_SIGN_IN = 9001;
 
     private static final int REQUEST_LEADERBOARD = 4000;
+    private static final int REQUEST_ACHIEVEMENTS = 5000;
 
     // achievements and scores we're pending to push to the cloud
     // (waiting for the user to sign in, for instance)
     Outbox mOutbox = new Outbox();
 
-    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         preferences = getPreferences(Context.MODE_PRIVATE);
-//        preferences = getSharedPreferences(PREFS_DATA, Context.MODE_PRIVATE);
-//        editor = preferences.edit();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -119,6 +115,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 mGoogleApiClient, getString(R.string.leaderboard_leaderboard)),
                         REQUEST_LEADERBOARD);
                 break;
+            case R.id.menu_achievements:
+                startActivityForResult(Games.Achievements.getAchievementsIntent(
+                        mGoogleApiClient), REQUEST_ACHIEVEMENTS);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -179,17 +178,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // Show sign-out button on main menu
         hideMenuItem(R.id.menu_sign_in);
         showMenuItem(R.id.menu_sign_out);
-
-        // Set the greeting appropriately on main menu
-//        Player p = Games.Players.getCurrentPlayer(mGoogleApiClient);
-//        String displayName;
-//        if (p == null) {
-//            Log.w(LOG_TAG, "mGamesClient.getCurrentPlayer() is NULL!");
-//            displayName = "You";
-//        } else {
-//            displayName = p.getDisplayName();
-//        }
-//        mMainActivityFragment.setPlayerName(displayName.toUpperCase());
+        showMenuItem(R.id.menu_leaderboard);
+        showMenuItem(R.id.menu_achievements);
 
         // if we have accomplishments to push, push them
         if (!mOutbox.isEmpty()) {
@@ -200,6 +190,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(LOG_TAG, "onConnectionSuspended(): attempting to connect");
+        showMenuItem(R.id.menu_sign_in);
+        hideMenuItem(R.id.menu_sign_out);
+        hideMenuItem(R.id.menu_leaderboard);
+        hideMenuItem(R.id.menu_achievements);
         mGoogleApiClient.connect();
     }
 
@@ -243,9 +237,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mOutbox.mBest = mOutbox.mScore;
             mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
         }
+        if (mOutbox.mScore > mOutbox.mSocialBest) {
+            mOutbox.mSocialBest = mOutbox.mScore;
+            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest);
+        }
         if (mOutbox.mScore > mOutbox.mWorldBest) {
             mOutbox.mWorldBest = mOutbox.mScore;
-            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mWorldBest);
+            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest);
         }
 
         if (!isSignedIn()) {
@@ -258,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 getString(R.string.leaderboard_leaderboard),
                 mOutbox.mScore);
 
-        // Update user best score.
+        // Pull user best score.
         Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient,
                 getString(R.string.leaderboard_leaderboard),
                 LeaderboardVariant.TIME_SPAN_ALL_TIME,
@@ -267,9 +265,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                     @Override
                     public void onResult(Leaderboards.LoadPlayerScoreResult arg0) {
-                        LeaderboardScore c = arg0.getScore();
-                        if (c.getRawScore() > mOutbox.mBest) {
-                            mOutbox.mBest = c.getRawScore();
+                        float score = arg0.getScore().getRawScore();
+                        if (score > mOutbox.mBest) {
+                            mOutbox.mBest = score;
                             mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
                             mOutbox.saveLocal();
                         }
@@ -277,23 +275,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                 });
 
-        // Update to world best.
+        // Pull world best
+        pullLeaderboards(LeaderboardVariant.COLLECTION_PUBLIC, mOutbox.mWorldBest, WORLD_SCORE);
+        // Pull social best
+        pullLeaderboards(LeaderboardVariant.COLLECTION_SOCIAL, mOutbox.mSocialBest, SOCIAL_SCORE);
+
+        mOutbox.saveLocal();
+    }
+
+    private void pullLeaderboards(int collection, final float currentBestScore, final int view) {
         Games.Leaderboards.loadTopScores(mGoogleApiClient,
                 getString(R.string.leaderboard_leaderboard),
                 LeaderboardVariant.TIME_SPAN_ALL_TIME,
-                LeaderboardVariant.COLLECTION_PUBLIC,
+                collection,
                 1).setResultCallback(new ResultCallback<Leaderboards.LoadScoresResult>() {
             @Override
             public void onResult(Leaderboards.LoadScoresResult loadScoresResult) {
                 float topScore = loadScoresResult.getScores().get(0).getRawScore();
-                if (topScore > mOutbox.mWorldBest) {
-                    mOutbox.mWorldBest = topScore;
-                    mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest);
+                if (topScore > currentBestScore) {
+                    if (view == SOCIAL_SCORE) {
+                        mOutbox.mSocialBest = topScore;
+                    } else {
+                        mOutbox.mWorldBest = topScore;
+                    }
+                    mMainActivityFragment.updateScoreViews(view, topScore);
                     mOutbox.saveLocal();
                 }
             }
         });
-        mOutbox.saveLocal();
     }
 
     void pushAccomplishments() {
@@ -334,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         int mBoredSteps = 0;
         int mScore = 0;
         float mWorldBest = 0;
+        float mSocialBest = 0;
         float mBest = 0;
 
         boolean isEmpty() {
@@ -344,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         public void saveLocal() {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putFloat(WORLD_BEST, mWorldBest)
+                    .putFloat(SOCIAL_BEST, mSocialBest)
                     .putFloat(PERSONAL_BEST, mBest)
                     .putInt(LAST_SCORE, mScore)
                     .apply();
@@ -351,10 +362,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         public void loadLocal() {
             mWorldBest = preferences.getFloat(WORLD_BEST, 0);
+            mSocialBest = preferences.getFloat(SOCIAL_BEST, 0);
             mBest = preferences.getFloat(PERSONAL_BEST, 0);
             mScore = preferences.getInt(LAST_SCORE, 0);
             mMainActivityFragment.updateScoreViews(CURRENT_SCORE, mOutbox.mScore);
             mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest);
+            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest);
             mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
         }
     }

@@ -46,10 +46,12 @@ import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
  */
 public class MainActivityFragment extends Fragment implements View.OnClickListener, SensorEventListener {
 
+    final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+
     public static final int CURRENT_SCORE = 0;
     public static final int WORLD_SCORE = 1;
-    public static final int USER_SCORE = 2;
-    final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+    public static final int SOCIAL_SCORE = 2;
+    public static final int USER_SCORE = 3;
 
     /*
      *Animation constants
@@ -79,23 +81,17 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private View mTempToolbar;
     private LinearLayout mAltBackground;
     private View mToolbarView;
-    private Toolbar mToolbar;
 
-    private TextView mPlayerName;
     private TextView mWorldScore;
+    private TextView mSocialScore;
     private TextView mUserScore;
     private TextView mCurrentScore;
 
-    private TextView xValue;
-    private TextView yValue;
-    private TextView zValue;
+    //    private TextView xValue;
+//    private TextView yValue;
+//    private TextView zValue;
     private SensorManager sensorManager = null;
     private int mXValue;
-
-    /**
-     * Best score to date.
-     */
-    private int mBestScore;
 
     /**
      * A handle to the thread that's actually running the animation.
@@ -140,7 +136,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         int actionBarHeight = Utilities.getActionBarHeight(getContext());
 
         // Set toolbar (ActionBar/AppBar)
-        mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        Toolbar mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
         mToolbar.setTitle(getString(R.string.app_name));
         mToolbar.setPadding(0, statusBarHeight, 0, 0);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
@@ -155,8 +151,9 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         mAltBackground = (LinearLayout) view.findViewById(R.id.alt_background);
 
-        mPlayerName = (TextView) view.findViewById(R.id.player_name);
+        // Initialise scores.
         mWorldScore = (TextView) view.findViewById(R.id.world_score);
+        mSocialScore = (TextView) view.findViewById(R.id.social_score);
         mUserScore = (TextView) view.findViewById(R.id.user_score);
         mCurrentScore = (TextView) view.findViewById(R.id.current_score);
         mCurrentScore.setText("0");
@@ -273,10 +270,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
     }
 
-    public void setPlayerName(String playerName) {
-        mPlayerName.setText(playerName);
-    }
-
     private void onGameStart() {
         Log.v(LOG_TAG, "onGameStart, game started.");
 
@@ -360,6 +353,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         TextView textView = mCurrentScore;
         if (view == WORLD_SCORE) {
             textView = mWorldScore;
+        } else if (view == SOCIAL_SCORE) {
+            textView = mSocialScore;
         } else if (view == USER_SCORE) {
             textView = mUserScore;
         }

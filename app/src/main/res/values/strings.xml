@@ -8,4 +8,6 @@
     <string name="achievement_prime_blah">Prime score!</string>
     <string name="sign_out">Sign Out</string>
     <string name="leaderboards">Leaderboards</string>
+    <string name="achievements">Achievements</string>
+    <string name="world_best">World Best</string>
 </resources>
