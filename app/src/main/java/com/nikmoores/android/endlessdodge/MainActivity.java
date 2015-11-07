@@ -20,7 +20,10 @@ import com.google.android.gms.plus.Plus;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.CURRENT_SCORE;
+import static com.nikmoores.android.endlessdodge.MainActivityFragment.FADE_IN;
+import static com.nikmoores.android.endlessdodge.MainActivityFragment.FADE_OUT;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.Listener;
+import static com.nikmoores.android.endlessdodge.MainActivityFragment.NO_FADE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.SOCIAL_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.USER_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.WORLD_SCORE;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final String SOCIAL_BEST = "WB";
     public static final String PERSONAL_BEST = "PB";
     public static final String LAST_SCORE = "last_score";
+    public static final String TOTAL_DISTANCE = "total_distance";
 
     SharedPreferences preferences;
 
@@ -103,27 +107,31 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_settings:
                 return true;
             case R.id.menu_sign_in:
+                // TODO: Fix InputEventReciever issue here.
                 mSignInClicked = true;
                 mGoogleApiClient.connect();
+//                mHandler.postDelayed(new setSigninState(mGoogleApiClient, true), 100);
                 break;
             case R.id.menu_sign_out:
                 mSignInClicked = false;
                 mGoogleApiClient.disconnect();
+//                mHandler.postDelayed(new setSigninState(mGoogleApiClient, false), 100);
                 break;
             case R.id.menu_leaderboard:
-                startActivityForResult(Games.Leaderboards.getLeaderboardIntent(
-                                mGoogleApiClient, getString(R.string.leaderboard_leaderboard)),
-                        REQUEST_LEADERBOARD);
+                if (isSignedIn()) {
+                    startActivityForResult(Games.Leaderboards.getLeaderboardIntent(
+                                    mGoogleApiClient, getString(R.string.leaderboard_leaderboard)),
+                            REQUEST_LEADERBOARD);
+                }
                 break;
             case R.id.menu_achievements:
-                startActivityForResult(Games.Achievements.getAchievementsIntent(
-                        mGoogleApiClient), REQUEST_ACHIEVEMENTS);
+                if (isSignedIn()) {
+                    startActivityForResult(Games.Achievements.getAchievementsIntent(
+                            mGoogleApiClient), REQUEST_ACHIEVEMENTS);
+                }
+                break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private boolean isSignedIn() {
-        return (mGoogleApiClient != null && mGoogleApiClient.isConnected());
     }
 
     @Override
@@ -154,6 +162,28 @@ public class MainActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         mOutbox.saveLocal();
+    }
+
+    private boolean isSignedIn() {
+        return (mGoogleApiClient != null && mGoogleApiClient.isConnected());
+    }
+
+    private void setSignedInMode() {
+        if (isSignedIn()) {
+            showMenuItem(R.id.menu_sign_in);
+            hideMenuItem(R.id.menu_sign_out);
+            hideMenuItem(R.id.menu_leaderboard);
+            hideMenuItem(R.id.menu_achievements);
+            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, FADE_IN);
+            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, FADE_IN);
+        } else {
+            hideMenuItem(R.id.menu_sign_in);
+            showMenuItem(R.id.menu_sign_out);
+            showMenuItem(R.id.menu_leaderboard);
+            showMenuItem(R.id.menu_achievements);
+            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, FADE_OUT);
+            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, FADE_OUT);
+        }
     }
 
     @Override
@@ -190,10 +220,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(LOG_TAG, "onConnectionSuspended(): attempting to connect");
-        showMenuItem(R.id.menu_sign_in);
-        hideMenuItem(R.id.menu_sign_out);
-        hideMenuItem(R.id.menu_leaderboard);
-        hideMenuItem(R.id.menu_achievements);
+        setSignedInMode();
         mGoogleApiClient.connect();
     }
 
@@ -231,19 +258,20 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void updateLeaderboards(int score) {
         mOutbox.mScore = score;
-        mMainActivityFragment.updateScoreViews(CURRENT_SCORE, (float) mOutbox.mScore);
+        mOutbox.mTotalDistance += score;
+        mMainActivityFragment.updateScoreViews(CURRENT_SCORE, (float) mOutbox.mScore, NO_FADE);
 
         if (mOutbox.mScore > mOutbox.mBest) {
             mOutbox.mBest = mOutbox.mScore;
-            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
+            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
         }
         if (mOutbox.mScore > mOutbox.mSocialBest) {
             mOutbox.mSocialBest = mOutbox.mScore;
-            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest);
+            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, NO_FADE);
         }
         if (mOutbox.mScore > mOutbox.mWorldBest) {
             mOutbox.mWorldBest = mOutbox.mScore;
-            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest);
+            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, NO_FADE);
         }
 
         if (!isSignedIn()) {
@@ -268,11 +296,10 @@ public class MainActivity extends AppCompatActivity implements
                         float score = arg0.getScore().getRawScore();
                         if (score > mOutbox.mBest) {
                             mOutbox.mBest = score;
-                            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
+                            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
                             mOutbox.saveLocal();
                         }
                     }
-
                 });
 
         // Pull world best
@@ -298,9 +325,10 @@ public class MainActivity extends AppCompatActivity implements
                     } else {
                         mOutbox.mWorldBest = topScore;
                     }
-                    mMainActivityFragment.updateScoreViews(view, topScore);
+                    mMainActivityFragment.updateScoreViews(view, topScore, NO_FADE);
                     mOutbox.saveLocal();
                 }
+                loadScoresResult.release();
             }
         });
     }
@@ -335,12 +363,32 @@ public class MainActivity extends AppCompatActivity implements
 //        }
     }
 
+//    private class setSigninState implements Runnable{
+////        private final GoogleApiClient mGoogleApiClient;
+//        private final boolean signIn;
+//
+//        public setSigninState(GoogleApiClient googleApiClient, boolean signIn){
+////            mGoogleApiClient = googleApiClient;
+//            this.signIn = signIn;
+//        }
+//
+//        @Override
+//        public void run() {
+//            mSignInClicked = signIn;
+//            if(signIn){
+//                mGoogleApiClient.connect();
+//            }else{
+//                mGoogleApiClient.disconnect();
+//            }
+//        }
+//    }
+
     class Outbox {
         boolean mPrimeAchievement = false;
         boolean mHumbleAchievement = false;
         boolean mLeetAchievement = false;
         boolean mArrogantAchievement = false;
-        int mBoredSteps = 0;
+        int mTotalDistance = 0;
         int mScore = 0;
         float mWorldBest = 0;
         float mSocialBest = 0;
@@ -348,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements
 
         boolean isEmpty() {
             return !mPrimeAchievement && !mHumbleAchievement && !mLeetAchievement &&
-                    !mArrogantAchievement && mBoredSteps == 0;
+                    !mArrogantAchievement;
         }
 
         public void saveLocal() {
@@ -357,6 +405,7 @@ public class MainActivity extends AppCompatActivity implements
                     .putFloat(SOCIAL_BEST, mSocialBest)
                     .putFloat(PERSONAL_BEST, mBest)
                     .putInt(LAST_SCORE, mScore)
+                    .putInt(TOTAL_DISTANCE, mTotalDistance)
                     .apply();
         }
 
@@ -365,10 +414,11 @@ public class MainActivity extends AppCompatActivity implements
             mSocialBest = preferences.getFloat(SOCIAL_BEST, 0);
             mBest = preferences.getFloat(PERSONAL_BEST, 0);
             mScore = preferences.getInt(LAST_SCORE, 0);
-            mMainActivityFragment.updateScoreViews(CURRENT_SCORE, mOutbox.mScore);
-            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest);
-            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest);
-            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest);
+            mTotalDistance = preferences.getInt(TOTAL_DISTANCE, 0);
+            mMainActivityFragment.updateScoreViews(CURRENT_SCORE, mOutbox.mScore, NO_FADE);
+            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, NO_FADE);
+            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, NO_FADE);
+            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
         }
     }
 }
