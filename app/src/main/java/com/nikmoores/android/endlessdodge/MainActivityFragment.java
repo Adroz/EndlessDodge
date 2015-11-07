@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -44,7 +45,8 @@ import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements View.OnClickListener, SensorEventListener {
+public class MainActivityFragment extends Fragment implements View.OnClickListener,
+        SensorEventListener, GameView.ThreadListener {
 
     final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
@@ -61,6 +63,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     final static int START_ANIMATION_SPEED = 400;
     final static int START_ANIMATION_LONG_DELAY = 400;
     final static int START_ANIMATION_SHORT_DELAY = 0;
+
+    final static int NO_FADE = 0;
+    final static int FADE_IN = 1;
+    final static int FADE_OUT = 2;
 
     private static List<int[]> colourArray;
     private static ColourSet colourSet;
@@ -161,6 +167,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         // GameView, extends SurfaceView to provide game animations and logic.
         mGameView = (GameView) view.findViewById(R.id.game_view);
 
+        mGameView.setListener(this);
         mGameLoop = mGameView.getThread();
 
         //TODO: For testing, delete me.
@@ -184,6 +191,13 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setOnClickListener(this);
     }
 
+    public void updateGameLoop() {
+        mGameLoop = mGameView.getThread();
+        mGameLoop.setState(GameLoop.STATE_READY);
+        mGameLoop.setColour(colourSet.primarySet);
+        mGameLoop.setFabData(fabEndLocation[0], fabEndLocation[1], fabRadius);
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -201,9 +215,14 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onPause() {
         Log.v(LOG_TAG, "onPause called.");
         // When Fragment is paused, pause game.
-        mGameView.getThread().pause();
         mGameLoop.pause();
         super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        Log.v(LOG_TAG, "onResume called.");
+        super.onResume();
     }
 
     @Override
@@ -329,7 +348,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mGameLoop.setState(GameLoop.STATE_END);
 
         // Set score.
-        // TODO: Fix me
         mListener.updateLeaderboards(finalScore);
 
         // Generate new colours as the FAB will get a new colour.
@@ -348,8 +366,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setOnClickListener(this);
     }
 
-    public void updateScoreViews(int view, float score) {
-        Log.d(LOG_TAG, "Updating score (" + view + "): " + score);
+    public void updateScoreViews(int view, float score, int fadeType) {
+//        Log.d(LOG_TAG, "Updating score (" + view + "): " + score);
         TextView textView = mCurrentScore;
         if (view == WORLD_SCORE) {
             textView = mWorldScore;
@@ -359,6 +377,12 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
             textView = mUserScore;
         }
         textView.setText(String.format("%d", (int) score));
+        if (fadeType == FADE_IN) {
+            textView.startAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
+        } else if (fadeType == FADE_OUT) {
+            textView.startAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
+        }
+
     }
 
     private void animateBackgroundFade(final View view, final int colour) {

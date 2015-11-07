@@ -37,9 +37,9 @@ public class Utilities {
     public static int MIN_HEIGHT = 100;
 
     /* Physics values */
-    public static int PHYS_X_ACCEL_SEC = 2500;     // TODO: Will need to be calculated based on screen width.
-    public static int PHYS_X_MAX_SPEED = 700;     // TODO: Will need to be calculated based on screen width.
-    public static int SCROLLING_Y_SPEED = 400;      // TODO: Will need to be calculated based on screen height.
+    public static int PHYS_X_ACCEL_SEC = 2500;
+    public static int PHYS_X_MAX_SPEED = 700;
+    public static int SCROLLING_Y_SPEED = 400;
 
     /* FAB values */
     public static int FAB_X = 100;
@@ -88,10 +88,12 @@ public class Utilities {
     public static List<int[]> get2dResourceArray(Context context, String key) {
         List<int[]> array = new ArrayList<>();
         Resources resources = context.getResources();
+        //noinspection finally
         try {
             Class<R.array> res = R.array.class;
             Field field;
             int counter = 0;
+            //noinspection ConstantConditions
             do {
                 field = res.getField(key + "_" + counter);
                 field.getInt(field);
@@ -105,6 +107,7 @@ public class Utilities {
         } catch (Exception e) {
 //            e.printStackTrace();
         } finally {
+            //noinspection ReturnInsideFinallyBlock
             return array;
         }
     }
@@ -128,6 +131,7 @@ public class Utilities {
         return 0;
     }
 
+    @SuppressWarnings("unused")
     public static int interpolate(double ratio, int valueTo, int valueFrom) {
         return (int) Math.abs((ratio * valueTo) + ((1 - ratio) * valueFrom));
     }

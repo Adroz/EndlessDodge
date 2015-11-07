@@ -51,13 +51,6 @@ public class GameLoop extends Thread {
     public static final int STATE_RUNNING = 5;
 
     /*
-     * Physics constants.
-     */
-//    public static final int PHYS_X_ACCEL_SEC = 2500;     // TODO: Will need to be calculated based on screen width.
-//    public static final int PHYS_X_MAX_SPEED = 700;     // TODO: Will need to be calculated based on screen width.
-//    public static final int SCROLLING_Y_SPEED = 400;      // TODO: Will need to be calculated based on screen height.
-
-    /*
      * State key constants.
      */
     private static final String KEY_SCORE = "mCurrentScore";
@@ -209,7 +202,7 @@ public class GameLoop extends Thread {
     public GameLoop(SurfaceHolder holder, Context context, Handler handler) {
         mSurfaceHolder = holder;
         mContext = context;
-        mHandler = handler;
+//        mHandler = handler;
 
         // Initialise variables.
         mLinePaint = new Paint();
@@ -511,6 +504,7 @@ public class GameLoop extends Thread {
      */
     private void doDraw(Canvas canvas) {
 //        Log.d(LOG_TAG, "drawing frame");
+        if (canvas == null) return;
         if (tempBmp.isRecycled() || tempBmp.getWidth() != canvas.getWidth() || tempBmp.getHeight() != canvas.getHeight()) {
             tempBmp.recycle();
             tempBmp = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);

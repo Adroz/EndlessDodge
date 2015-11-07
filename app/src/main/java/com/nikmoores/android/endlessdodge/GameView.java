@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.TextView;
@@ -20,9 +21,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
      */
     private GameLoop gameLoop;
 
+    private Context mContext;
+
 
     // Testing TextView.
     private TextView mStatusText;
+
+    ThreadListener mListener = null;
+
+    public interface ThreadListener {
+        void updateGameLoop();
+    }
 
 
     public GameView(Context context, AttributeSet attributeSet) {
@@ -31,6 +40,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         // Register to listen to SurfaceView changes.
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
+
+        mContext = context;
 
         // Create game loop thread. Actually started in SurfaceCreated().
         gameLoop = new GameLoop(holder, context, new Handler() {
@@ -44,6 +55,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         // To ensure key events received.
         setFocusable(true);
     }
+
+    public void setListener(ThreadListener l) {
+        mListener = l;
+    }
+
 
     public GameLoop getThread() {
         return gameLoop;
@@ -67,8 +83,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        if (gameLoop.getState() != Thread.State.NEW) {
+            gameLoop = new GameLoop(holder, mContext, null);
+            mListener.updateGameLoop();
+        }
         gameLoop.setRunning(true);
-        gameLoop.start();           // TODO: This can still cause an error apparently. Investigate.
+        gameLoop.start();
     }
 
     @Override
@@ -87,7 +107,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 gameLoop.join();
                 retry = false;
             } catch (InterruptedException e) {
-//                Log.e(LOG_TAG, "Error destroying GameView: " + e.toString());
+                Log.e(LOG_TAG, "Error destroying GameView: " + e.toString());
             }
         }
     }
