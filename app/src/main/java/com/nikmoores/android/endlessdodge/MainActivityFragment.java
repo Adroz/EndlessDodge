@@ -114,7 +114,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     }
 
     public interface Listener {
-        void updateLeaderboards(int score);
+        void updateAccomplishments(int score);
     }
 
     Listener mListener = null;
@@ -348,7 +348,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mGameLoop.setState(GameLoop.STATE_END);
 
         // Set score.
-        mListener.updateLeaderboards(finalScore);
+        mListener.updateAccomplishments(finalScore);
 
         // Generate new colours as the FAB will get a new colour.
         colourSet.setGameColours();

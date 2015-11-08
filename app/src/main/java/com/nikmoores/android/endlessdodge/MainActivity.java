@@ -82,6 +82,10 @@ public class MainActivity extends AppCompatActivity implements
                 .addApi(Drive.API).addScope(Drive.SCOPE_APPFOLDER)
                 .build();
 
+        // FOR TESTING ONLY - Reset mOutbox
+//        mOutbox.reset();
+//        mOutbox.saveLocal();
+
         // Create fragment and listen
         mMainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
         mMainActivityFragment.setListener(this);
@@ -155,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onResume();
         // load outbox from file
         mOutbox.loadLocal();
-        updateLeaderboards(mOutbox.mScore);
+        updateAccomplishments(mOutbox.mScore);
     }
 
     @Override
@@ -213,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // if we have accomplishments to push, push them
         if (!mOutbox.isEmpty()) {
-            pushAccomplishments();
+            pushAchievements();
         }
     }
 
@@ -256,33 +260,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void updateLeaderboards(int score) {
+    public void updateAccomplishments(int score) {
         mOutbox.mScore = score;
         mOutbox.mTotalDistance += score;
         mMainActivityFragment.updateScoreViews(CURRENT_SCORE, (float) mOutbox.mScore, NO_FADE);
 
-        if (mOutbox.mScore > mOutbox.mBest) {
-            mOutbox.mBest = mOutbox.mScore;
-            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
-        }
-        if (mOutbox.mScore > mOutbox.mSocialBest) {
-            mOutbox.mSocialBest = mOutbox.mScore;
-            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, NO_FADE);
-        }
-        if (mOutbox.mScore > mOutbox.mWorldBest) {
-            mOutbox.mWorldBest = mOutbox.mScore;
-            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, NO_FADE);
-        }
+        pushAchievements();
+        pushLeaderboards();
 
         if (!isSignedIn()) {
+            // can't push to the cloud, so save locally
             mOutbox.saveLocal();
             return;
         }
-        // Submit current score
-        Games.Leaderboards.submitScore(
-                mGoogleApiClient,
-                getString(R.string.leaderboard_leaderboard),
-                mOutbox.mScore);
 
         // Pull user best score.
         Games.Leaderboards.loadCurrentPlayerLeaderboardScore(mGoogleApiClient,
@@ -333,15 +323,16 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
-    void pushAccomplishments() {
-        if (!isSignedIn()) {
-            // can't push to the cloud, so save locally
-            mOutbox.saveLocal();
-            return;
-        }
-        if (mOutbox.mPrimeAchievement) {
-            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_prime));
-            mOutbox.mPrimeAchievement = false;
+    void pushAchievements() {
+        if (mOutbox.mScore == 0) mOutbox.mCaughtNappingAchievement = true;
+//        if (mOutbox.mScore == 0) mOutbox.mCaughtNappingAchievement = true;
+//        if (mOutbox.mScore == 0) mOutbox.mCaughtNappingAchievement = true;
+
+        if (!isSignedIn()) return;
+
+        if (mOutbox.mCaughtNappingAchievement) {
+            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_caught_napping));
+            mOutbox.mCaughtNappingAchievement = false;
         }
 //        if (mOutbox.mArrogantAchievement) {
 //            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_arrogant));
@@ -355,12 +346,43 @@ public class MainActivity extends AppCompatActivity implements
 //            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_leet));
 //            mOutbox.mLeetAchievement = false;
 //        }
-//        if (mOutbox.mBoredSteps > 0) {
-//            Games.Achievements.increment(mGoogleApiClient, getString(R.string.achievement_really_bored),
-//                    mOutbox.mBoredSteps);
-//            Games.Achievements.increment(mGoogleApiClient, getString(R.string.achievement_bored),
-//                    mOutbox.mBoredSteps);
-//        }
+        if (mOutbox.mScore > 0) {
+            Games.Achievements.increment(mGoogleApiClient,
+                    getString(R.string.achievement_and_i_would_walk_500_miles),
+                    mOutbox.mScore);
+            Games.Achievements.increment(mGoogleApiClient,
+                    getString(R.string.achievement_run_away_run_away_run_run_away),
+                    mOutbox.mScore);
+            Games.Achievements.increment(mGoogleApiClient,
+                    getString(R.string.achievement_hes_going_the_distance),
+                    mOutbox.mScore);
+            Games.Achievements.increment(mGoogleApiClient,
+                    getString(R.string.achievement_gonna_take_her_for_a_ride_on_a_big_jet_plane),
+                    mOutbox.mScore);
+        }
+    }
+
+    private void pushLeaderboards() {
+        if (mOutbox.mScore > mOutbox.mBest) {
+            mOutbox.mBest = mOutbox.mScore;
+            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
+        }
+        if (mOutbox.mScore > mOutbox.mSocialBest) {
+            mOutbox.mSocialBest = mOutbox.mScore;
+            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, NO_FADE);
+        }
+        if (mOutbox.mScore > mOutbox.mWorldBest) {
+            mOutbox.mWorldBest = mOutbox.mScore;
+            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, NO_FADE);
+        }
+
+        if (!isSignedIn()) return;
+
+        // Submit current score
+        Games.Leaderboards.submitScore(
+                mGoogleApiClient,
+                getString(R.string.leaderboard_leaderboard),
+                mOutbox.mScore);
     }
 
 //    private class setSigninState implements Runnable{
@@ -384,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements
 //    }
 
     class Outbox {
-        boolean mPrimeAchievement = false;
+        boolean mCaughtNappingAchievement = false;
         boolean mHumbleAchievement = false;
         boolean mLeetAchievement = false;
         boolean mArrogantAchievement = false;
@@ -394,8 +416,20 @@ public class MainActivity extends AppCompatActivity implements
         float mSocialBest = 0;
         float mBest = 0;
 
+        void reset() {
+            mCaughtNappingAchievement = false;
+            mHumbleAchievement = false;
+            mLeetAchievement = false;
+            mArrogantAchievement = false;
+            mTotalDistance = 0;
+            mScore = 0;
+            mWorldBest = 0;
+            mSocialBest = 0;
+            mBest = 0;
+        }
+
         boolean isEmpty() {
-            return !mPrimeAchievement && !mHumbleAchievement && !mLeetAchievement &&
+            return !mCaughtNappingAchievement && !mHumbleAchievement && !mLeetAchievement &&
                     !mArrogantAchievement;
         }
 
