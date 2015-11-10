@@ -13,7 +13,7 @@ android {
     }
     signingConfigs {
         config {
-            storeFile file("..\\..\\android_keystore.jks")
+            storeFile file(System.getenv("KEYSTORE"))
             storePassword System.getenv("KSTOREPWD")
             keyAlias "AndroidKey"
             keyPassword System.getenv("KEYPWD")
