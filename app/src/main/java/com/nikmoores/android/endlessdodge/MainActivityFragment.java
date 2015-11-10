@@ -23,7 +23,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -77,6 +80,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 //    private static int screenY;
     public static int[] fabStartLocation = new int[2];
     public static int[] fabEndLocation = new int[]{0, 0};
+    private static float fabScale;
     private static int fabRadius;
     private static int statusBarOffset;  // Only > 0 when API is <21 (should be tested and confirmed).
 
@@ -252,7 +256,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
             public void run() {
                 // Get FAB start and end locations, and radius
                 mFab.getLocationOnScreen(fabStartLocation);
-                fabRadius = mFab.getHeight() / 2;
+                fabScale = (screenHeight / 8) / (float) mFab.getHeight();
+                fabRadius = (int) (mFab.getHeight() * fabScale / 2);
                 fabEndLocation[0] = (screenWidth - mFab.getHeight()) / 2;
                 fabEndLocation[1] = screenHeight - (screenWidth - mFab.getHeight()) / 4;
                 mGameLoop.setFabData(fabEndLocation[0], fabEndLocation[1], fabRadius);
@@ -306,11 +311,18 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         // TODO: Possibly add colour change animation - make FAB start as a 500 colour (darker).
         // TODO: Create a curved path for the animation and make the movement non-linear.
         // Animate to game start position.
-        TranslateAnimation animation = new TranslateAnimation(
+        AnimationSet animation = new AnimationSet(true);
+        animation.setFillAfter(true);
+        animation.setDuration(START_ANIMATION_SPEED);
+        animation.setInterpolator(new DecelerateInterpolator());
+        ScaleAnimation scaleAnimation = new ScaleAnimation(
+                1f, fabScale, 1f, fabScale,
+                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        animation.addAnimation(scaleAnimation);
+        TranslateAnimation translateAnimation = new TranslateAnimation(
                 0, fabEndLocation[0] - fabStartLocation[0],
                 0, fabEndLocation[1] - fabStartLocation[1]);
-        animation.setDuration(START_ANIMATION_SPEED);
-        animation.setFillAfter(true);
+        animation.addAnimation(translateAnimation);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
