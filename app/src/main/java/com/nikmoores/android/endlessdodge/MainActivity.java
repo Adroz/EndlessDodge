@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void updateAccomplishments(int score) {
+    public void updateAccomplishments(final int score) {
         mOutbox.mScore = score;
         mOutbox.mTotalDistance += score;
         mMainActivityFragment.updateScoreViews(CURRENT_SCORE, (float) mOutbox.mScore, NO_FADE);
@@ -283,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements
 
                     @Override
                     public void onResult(Leaderboards.LoadPlayerScoreResult arg0) {
+                        if (arg0 == null) return;
                         float score = arg0.getScore().getRawScore();
                         if (score > mOutbox.mBest) {
                             mOutbox.mBest = score;
@@ -308,6 +309,7 @@ public class MainActivity extends AppCompatActivity implements
                 1).setResultCallback(new ResultCallback<Leaderboards.LoadScoresResult>() {
             @Override
             public void onResult(Leaderboards.LoadScoresResult loadScoresResult) {
+                if (loadScoresResult == null) return;
                 float topScore = loadScoresResult.getScores().get(0).getRawScore();
                 if (topScore > currentBestScore) {
                     if (view == SOCIAL_SCORE) {

@@ -42,6 +42,8 @@ import java.util.Random;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
 
+import static com.nikmoores.android.endlessdodge.Utilities.FAB_X;
+import static com.nikmoores.android.endlessdodge.Utilities.FAB_Y;
 import static com.nikmoores.android.endlessdodge.Utilities.screenHeight;
 import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
 
@@ -199,7 +201,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mGameLoop = mGameView.getThread();
         mGameLoop.setState(GameLoop.STATE_READY);
         mGameLoop.setColour(colourSet.primarySet);
-        mGameLoop.setFabData(fabEndLocation[0], fabEndLocation[1], fabRadius);
+        Utilities.setFabMeasurements(
+                screenWidth / 2,
+                mFab.getHeight() / 2 + fabEndLocation[1],
+                fabRadius);
     }
 
     @Override
@@ -255,13 +260,16 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
             @Override
             public void run() {
                 // Get FAB start and end locations, and radius
+                // TODO: Restructure this at some stage because this is bad.
                 mFab.getLocationOnScreen(fabStartLocation);
                 fabScale = (screenHeight / 8) / (float) mFab.getHeight();
                 fabRadius = (int) (mFab.getHeight() * fabScale / 2);
                 fabEndLocation[0] = (screenWidth - mFab.getHeight()) / 2;
-                fabEndLocation[1] = screenHeight - (screenWidth - mFab.getHeight()) / 4;
-                mGameLoop.setFabData(fabEndLocation[0], fabEndLocation[1], fabRadius);
-                Utilities.setFabMeasurements(fabEndLocation[0], fabEndLocation[1], fabRadius);
+                fabEndLocation[1] = (int) (screenHeight - fabRadius * 1.75);
+                Utilities.setFabMeasurements(
+                        screenWidth / 2,
+                        mFab.getHeight() / 2 + fabEndLocation[1],
+                        fabRadius);
             }
         });
 
@@ -270,8 +278,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
             public void run() {
                 // Get the final radius for the clipping circle
                 maxBackgroundSize = Math.max(mAltBackground.getWidth(), mAltBackground.getHeight());
-                statusBarOffset = screenHeight - mAltBackground.getHeight();
-                fabEndLocation[1] -= statusBarOffset; // Doesn't matter what view finishes first.
             }
         });
     }
@@ -309,7 +315,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
         // TODO: Possibly add colour change animation - make FAB start as a 500 colour (darker).
-        // TODO: Create a curved path for the animation and make the movement non-linear.
         // Animate to game start position.
         AnimationSet animation = new AnimationSet(true);
         animation.setFillAfter(true);
@@ -356,7 +361,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         int finalScore = mGameLoop.getCurrentScore();
 
-        // TODO: Fix Me
         mGameLoop.setState(GameLoop.STATE_END);
 
         // Set score.
@@ -424,11 +428,11 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private SupportAnimator animateBackgroundReveal(final View view) {
         // Create animator for view. Start radius is the FAB size.
         SupportAnimator animator = ViewAnimationUtils.createCircularReveal(
-                view,                           // The view to animate
-                fabEndLocation[0] + fabRadius,  // Centre of reveal X
-                fabEndLocation[1] + fabRadius,  // Centre of reveal Y
-                fabRadius,                      // Start radius
-                maxBackgroundSize);             // End radius
+                view,               // The view to animate
+                FAB_X,              // Centre of reveal X
+                FAB_Y,              // Centre of reveal Y
+                fabRadius,          // Start radius
+                maxBackgroundSize); // End radius
         animator.setDuration(DEATH_ANIMATION_SPEED);      // Duration
         animator.addListener(new SupportAnimator.AnimatorListener() {
             @Override

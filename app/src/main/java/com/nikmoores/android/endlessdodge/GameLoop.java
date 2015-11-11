@@ -21,6 +21,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import static com.nikmoores.android.endlessdodge.Utilities.DEBUG_MODE;
+import static com.nikmoores.android.endlessdodge.Utilities.FAB_RADIUS;
+import static com.nikmoores.android.endlessdodge.Utilities.FAB_X;
 import static com.nikmoores.android.endlessdodge.Utilities.FAB_Y;
 import static com.nikmoores.android.endlessdodge.Utilities.MAX_WIDTH;
 import static com.nikmoores.android.endlessdodge.Utilities.PHYS_X_ACCEL_SEC;
@@ -232,7 +235,8 @@ public class GameLoop extends Thread {
                     //
                     // If mRun has been toggled false, inhibit canvas operations.
                     synchronized (mRunLock) {
-                        if (mRun) doDraw(c);            // TODO: Don't draw frames if the screen is off.
+                        if (mRun)
+                            doDraw(c);            // TODO: Don't draw frames if the screen is off.
                     }
                 }
             } finally {
@@ -492,7 +496,7 @@ public class GameLoop extends Thread {
 //        mHandler.sendMessage(msg);
     }
 
-    public int getCurrentScore(){
+    public int getCurrentScore() {
         return mCurrentScore;
     }
 
@@ -538,24 +542,28 @@ public class GameLoop extends Thread {
 
         // Draw walls.
         for (WallPair wallPair : mWallPairs) {
-            RectF scratchRect = wallPair.getRect(WallPair.LEFT_WALL);
-            if (!scratchRect.isEmpty()) {
-                tempCanvas.drawRect(scratchRect, mLinePaint);
+            mScratchRect.set(wallPair.getRect(WallPair.LEFT_WALL));
+            if (!mScratchRect.isEmpty()) {
+                tempCanvas.drawRect(mScratchRect, mLinePaint);
 //                drawRectShadow(
 //                        canvas,
 //                        true,
 //                        wallPair.getLeftWallDimensions(),
 //                        wallPair.getElevation());
             }
-            scratchRect = wallPair.getRect(WallPair.RIGHT_WALL);
-            if (!scratchRect.isEmpty()) {
-                tempCanvas.drawRect(scratchRect, mLinePaint);
+            mScratchRect.set(wallPair.getRect(WallPair.RIGHT_WALL));
+            if (!mScratchRect.isEmpty()) {
+                tempCanvas.drawRect(mScratchRect, mLinePaint);
 //                drawRectShadow(
 //                        canvas,
 //                        false,
 //                        wallPair.getRightWallDimensions(),
 //                        wallPair.getElevation());
             }
+        }
+        if (DEBUG_MODE) {
+            mScratchRect.set(FAB_X - FAB_RADIUS, FAB_Y - FAB_RADIUS, FAB_X + FAB_RADIUS, FAB_Y + FAB_RADIUS);
+            tempCanvas.drawRect(mScratchRect, mLinePaint);
         }
         canvas.drawBitmap(tempBmp, 0, 0, null);
     }
@@ -599,14 +607,15 @@ public class GameLoop extends Thread {
         // ---- COLLISION DETECTION ----
         // First check if any wall pairs are in line with the FAB.
         for (WallPair wallPair : mWallPairs) {
-//            Log.d(LOG_TAG, wallPair.toString());
-//            Log.d(LOG_TAG, "FAB top = " + (mFabData[1] - mFabData[2]));
-            if ((wallPair.getBottom() > mFabData[1] - mFabData[2])
-                    && wallPair.getTop() < mFabData[1] + mFabData[2]) {
+            if ((wallPair.getBottom() > FAB_Y - FAB_RADIUS)     // Inverse y-axis
+                    && wallPair.getTop() < FAB_Y + FAB_RADIUS) {
                 // Then check if either wall's inner edge is crossing the FAB
-                if ((wallPair.getLeftEdge() > mFabData[0] - mFabData[2]) ||
-                        wallPair.getRightEdge() < mFabData[0] + mFabData[2]) {
+                if ((wallPair.getLeftEdge() > FAB_X - FAB_RADIUS) ||
+                        wallPair.getRightEdge() < FAB_X + FAB_RADIUS) {
                     // For now, assume a hit
+                    Log.d(LOG_TAG, wallPair.toString());
+                    Log.d(LOG_TAG, "FAB top = " + (FAB_Y - FAB_RADIUS));
+                    Log.d(LOG_TAG, "FAB left/right = " + (FAB_X - FAB_RADIUS) + "/" + (FAB_X + FAB_RADIUS));
                     // TODO: Make more accurate, after testing.
                     Intent intent = new Intent(Utilities.INTENT_FILTER);
                     intent.putExtra(Utilities.STATE_KEY, STATE_END);

@@ -19,6 +19,11 @@ public class Utilities {
 
     static final String LOG_TAG = Utilities.class.getSimpleName();
 
+    /**
+     * Debug Mode Flag: Only set to true when debugging application
+     **/
+    public static final boolean DEBUG_MODE = false;
+
     /* Intent Constants */
     public static final String INTENT_FILTER = "com.nikmoores.android.endlessdodge.INTENT_FILTER";
     public static final String STATE_KEY = "state";
@@ -82,7 +87,7 @@ public class Utilities {
         // Set wall width.
         int minWidth = FAB_RADIUS * 9;
         WALL_WIDTH = (FAB_RADIUS * 11 - minWidth) + minWidth;
-        Log.d(LOG_TAG, "FAB location - " + FAB_X + "," + FAB_Y + " & FAB radius = " + FAB_RADIUS);
+        Log.d(LOG_TAG, "FAB location: " + FAB_X + "," + FAB_Y + " & FAB radius = " + FAB_RADIUS);
     }
 
     public static List<int[]> get2dResourceArray(Context context, String key) {
