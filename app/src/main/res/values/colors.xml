@@ -12,17 +12,11 @@
 
 <resources>
 
-
-    <!--<color name="primarySet">#2196F3</color>-->
-    <!--<color name="primary_dark">#1976D2</color>-->
-    <!--<color name="primary_light">#BBDEFB</color>-->
-    <!--<color name="accent">#009688</color>-->
-    <!--<color name="primary_text">#DD000000</color>-->
-    <!--<color name="primary_text_dark_background">#FFFFFF</color>-->
-    <!--<color name="secondary_text">#89000000</color>-->
-    <!--<color name="icons">#FFFFFF</color>-->
-    <!--<color name="divider">#30000000</color>-->
-
+    <color name="primary">#9E9E9E</color>
+    <color name="primary_dark">#616161</color>
+    <color name="accent">#651FFF</color>
+    <color name="text_primary">#D9FFFFFF</color>
+    <color name="text_secondary">#D9000000</color>
 
     <!-- Colors for the app -->
     <!--<color name="primary">@color/indigo_500</color>-->
@@ -30,71 +24,71 @@
     <!--<color name="accent">@color/pink_A200</color>-->
 
     <!--<array name="colour_0">-->
-        <!--<item name="red_50">#FFEBEE</item>-->
-        <!--<item name="red_100">#FFCDD2</item>-->
-        <!--<item name="red_200">#EF9A9A</item>-->
-        <!--<item name="red_300">#E57373</item>-->
-        <!--<item name="red_400">#EF5350</item>-->
-        <!--<item name="red_500">#F44336</item>-->
-        <!--<item name="red_600">#E53935</item>-->
-        <!--<item name="red_700">#D32F2F</item>-->
-        <!--<item name="red_800">#C62828</item>-->
-        <!--<item name="red_900">#B71C1C</item>-->
-        <!--<item name="red_A100">#FF8A80</item>-->
-        <!--<item name="red_A200">#FF5252</item>-->
-        <!--<item name="red_A400">#FF1744</item>-->
-        <!--<item name="red_A700">#D50000</item>-->
+    <!--<item name="red_50">#FFEBEE</item>-->
+    <!--<item name="red_100">#FFCDD2</item>-->
+    <!--<item name="red_200">#EF9A9A</item>-->
+    <!--<item name="red_300">#E57373</item>-->
+    <!--<item name="red_400">#EF5350</item>-->
+    <!--<item name="red_500">#F44336</item>-->
+    <!--<item name="red_600">#E53935</item>-->
+    <!--<item name="red_700">#D32F2F</item>-->
+    <!--<item name="red_800">#C62828</item>-->
+    <!--<item name="red_900">#B71C1C</item>-->
+    <!--<item name="red_A100">#FF8A80</item>-->
+    <!--<item name="red_A200">#FF5252</item>-->
+    <!--<item name="red_A400">#FF1744</item>-->
+    <!--<item name="red_A700">#D50000</item>-->
     <!--</array>-->
 
     <!--<array name="colour_1">-->
-        <!--<item name="deep_purple_50">#EDE7F6</item>-->
-        <!--<item name="deep_purple_100">#D1C4E9</item>-->
-        <!--<item name="deep_purple_200">#B39DDB</item>-->
-        <!--<item name="deep_purple_300">#9575CD</item>-->
-        <!--<item name="deep_purple_400">#7E57C2</item>-->
-        <!--<item name="deep_purple_500">#673AB7</item>-->
-        <!--<item name="deep_purple_600">#5E35B1</item>-->
-        <!--<item name="deep_purple_700">#512DA8</item>-->
-        <!--<item name="deep_purple_800">#4527A0</item>-->
-        <!--<item name="deep_purple_900">#311B92</item>-->
-        <!--<item name="deep_purple_A100">#B388FF</item>-->
-        <!--<item name="deep_purple_A200">#7C4DFF</item>-->
-        <!--<item name="deep_purple_A400">#651FFF</item>-->
-        <!--<item name="deep_purple_A700">#6200EA</item>-->
+    <!--<item name="deep_purple_50">#EDE7F6</item>-->
+    <!--<item name="deep_purple_100">#D1C4E9</item>-->
+    <!--<item name="deep_purple_200">#B39DDB</item>-->
+    <!--<item name="deep_purple_300">#9575CD</item>-->
+    <!--<item name="deep_purple_400">#7E57C2</item>-->
+    <!--<item name="deep_purple_500">#673AB7</item>-->
+    <!--<item name="deep_purple_600">#5E35B1</item>-->
+    <!--<item name="deep_purple_700">#512DA8</item>-->
+    <!--<item name="deep_purple_800">#4527A0</item>-->
+    <!--<item name="deep_purple_900">#311B92</item>-->
+    <!--<item name="deep_purple_A100">#B388FF</item>-->
+    <!--<item name="deep_purple_A200">#7C4DFF</item>-->
+    <!--<item name="deep_purple_A400">#651FFF</item>-->
+    <!--<item name="deep_purple_A700">#6200EA</item>-->
     <!--</array>-->
 
     <!--<array name="colour_2">-->
-        <!--<item name="light_blue_50">#E1F5FE</item>-->
-        <!--<item name="light_blue_100">#B3E5FC</item>-->
-        <!--<item name="light_blue_200">#81D4FA</item>-->
-        <!--<item name="light_blue_300">#4FC3F7</item>-->
-        <!--<item name="light_blue_400">#29B6F6</item>-->
-        <!--<item name="light_blue_500">#03A9F4</item>-->
-        <!--<item name="light_blue_600">#039BE5</item>-->
-        <!--<item name="light_blue_700">#0288D1</item>-->
-        <!--<item name="light_blue_800">#0277BD</item>-->
-        <!--<item name="light_blue_900">#01579B</item>-->
-        <!--<item name="light_blue_A100">#80D8FF</item>-->
-        <!--<item name="light_blue_A200">#40C4FF</item>-->
-        <!--<item name="light_blue_A400">#00B0FF</item>-->
-        <!--<item name="light_blue_A700">#0091EA</item>-->
+    <!--<item name="light_blue_50">#E1F5FE</item>-->
+    <!--<item name="light_blue_100">#B3E5FC</item>-->
+    <!--<item name="light_blue_200">#81D4FA</item>-->
+    <!--<item name="light_blue_300">#4FC3F7</item>-->
+    <!--<item name="light_blue_400">#29B6F6</item>-->
+    <!--<item name="light_blue_500">#03A9F4</item>-->
+    <!--<item name="light_blue_600">#039BE5</item>-->
+    <!--<item name="light_blue_700">#0288D1</item>-->
+    <!--<item name="light_blue_800">#0277BD</item>-->
+    <!--<item name="light_blue_900">#01579B</item>-->
+    <!--<item name="light_blue_A100">#80D8FF</item>-->
+    <!--<item name="light_blue_A200">#40C4FF</item>-->
+    <!--<item name="light_blue_A400">#00B0FF</item>-->
+    <!--<item name="light_blue_A700">#0091EA</item>-->
     <!--</array>-->
 
     <!--<array name="colour_3">-->
-        <!--<item name="green_50">#E8F5E9</item>-->
-        <!--<item name="green_100">#C8E6C9</item>-->
-        <!--<item name="green_200">#A5D6A7</item>-->
-        <!--<item name="green_300">#81C784</item>-->
-        <!--<item name="green_400">#66BB6A</item>-->
-        <!--<item name="green_500">#4CAF50</item>-->
-        <!--<item name="green_600">#43A047</item>-->
-        <!--<item name="green_700">#388E3C</item>-->
-        <!--<item name="green_800">#2E7D32</item>-->
-        <!--<item name="green_900">#1B5E20</item>-->
-        <!--<item name="green_A100">#B9F6CA</item>-->
-        <!--<item name="green_A200">#69F0AE</item>-->
-        <!--<item name="green_A400">#00E676</item>-->
-        <!--<item name="green_A700">#00C853</item>-->
+    <!--<item name="green_50">#E8F5E9</item>-->
+    <!--<item name="green_100">#C8E6C9</item>-->
+    <!--<item name="green_200">#A5D6A7</item>-->
+    <!--<item name="green_300">#81C784</item>-->
+    <!--<item name="green_400">#66BB6A</item>-->
+    <!--<item name="green_500">#4CAF50</item>-->
+    <!--<item name="green_600">#43A047</item>-->
+    <!--<item name="green_700">#388E3C</item>-->
+    <!--<item name="green_800">#2E7D32</item>-->
+    <!--<item name="green_900">#1B5E20</item>-->
+    <!--<item name="green_A100">#B9F6CA</item>-->
+    <!--<item name="green_A200">#69F0AE</item>-->
+    <!--<item name="green_A400">#00E676</item>-->
+    <!--<item name="green_A700">#00C853</item>-->
     <!--</array>-->
 
 

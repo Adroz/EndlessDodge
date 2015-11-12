@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 import com.google.android.gms.games.leaderboard.Leaderboards;
@@ -27,6 +26,7 @@ import static com.nikmoores.android.endlessdodge.MainActivityFragment.NO_FADE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.SOCIAL_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.USER_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.WORLD_SCORE;
+import static com.nikmoores.android.endlessdodge.Utilities.DEBUG_MODE;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, Listener {
@@ -79,12 +79,14 @@ public class MainActivity extends AppCompatActivity implements
                 .addOnConnectionFailedListener(this)
                 .addApi(Plus.API).addScope(Plus.SCOPE_PLUS_LOGIN)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
-                .addApi(Drive.API).addScope(Drive.SCOPE_APPFOLDER)
+                .setViewForPopups(findViewById(R.id.fragment))
                 .build();
 
-        // FOR TESTING ONLY - Reset mOutbox
-//        mOutbox.reset();
-//        mOutbox.saveLocal();
+        if (DEBUG_MODE) {
+            // FOR TESTING ONLY - Reset mOutbox
+            mOutbox.reset();
+            mOutbox.saveLocal();
+        }
 
         // Create fragment and listen
         mMainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
@@ -96,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements
         // Inflate the menu; this adds items to the action bar if it is present.
         this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        hideMenuItem(R.id.menu_sign_out);
         return true;
     }
 
@@ -106,35 +107,43 @@ public class MainActivity extends AppCompatActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        switch (id) {
-            case R.id.action_settings:
-                return true;
-            case R.id.menu_sign_in:
-                // TODO: Fix InputEventReciever issue here.
-                mSignInClicked = true;
-                mGoogleApiClient.connect();
-//                mHandler.postDelayed(new setSigninState(mGoogleApiClient, true), 100);
-                break;
-            case R.id.menu_sign_out:
-                mSignInClicked = false;
-                mGoogleApiClient.disconnect();
-//                mHandler.postDelayed(new setSigninState(mGoogleApiClient, false), 100);
-                break;
-            case R.id.menu_leaderboard:
-                if (isSignedIn()) {
-                    startActivityForResult(Games.Leaderboards.getLeaderboardIntent(
-                                    mGoogleApiClient, getString(R.string.leaderboard_leaderboard)),
-                            REQUEST_LEADERBOARD);
-                }
-                break;
-            case R.id.menu_achievements:
-                if (isSignedIn()) {
-                    startActivityForResult(Games.Achievements.getAchievementsIntent(
-                            mGoogleApiClient), REQUEST_ACHIEVEMENTS);
-                }
-                break;
+        if (id == R.id.action_settings) {
+            // TODO: Add settings page. Options for colour removal, light/dark mode.
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
         }
+
+//        switch (id) {
+//            case R.id.action_settings:
+//                // TODO: Add settings page. Options for colour removal, light/dark mode.
+//                startActivity(new Intent(this, SettingsActivity.class));
+//                return true;
+//            case R.id.menu_sign_in:
+//                // TODO: Fix InputEventReciever issue here.
+//                mSignInClicked = true;
+//                mGoogleApiClient.connect();
+//                mHandler.postDelayed(new setSigninState(mGoogleApiClient, true), 100);
+//                return true;
+//            case R.id.menu_sign_out:
+//                Log.d(LOG_TAG, "Sign out pressed");
+//                mSignInClicked = false;
+//                mGoogleApiClient.disconnect();
+//                mHandler.postDelayed(new setSigninState(mGoogleApiClient, false), 100);
+//                return true;
+//            case R.id.menu_leaderboard:
+//                if (isSignedIn()) {
+//                    startActivityForResult(Games.Leaderboards.getLeaderboardIntent(
+//                                    mGoogleApiClient, getString(R.string.leaderboard_leaderboard)),
+//                            REQUEST_LEADERBOARD);
+//                }
+//                return true;
+//            case R.id.menu_achievements:
+//                if (isSignedIn()) {
+//                    startActivityForResult(Games.Achievements.getAchievementsIntent(
+//                            mGoogleApiClient), REQUEST_ACHIEVEMENTS);
+//                }
+//                return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -174,17 +183,17 @@ public class MainActivity extends AppCompatActivity implements
 
     private void setSignedInMode() {
         if (isSignedIn()) {
-            showMenuItem(R.id.menu_sign_in);
-            hideMenuItem(R.id.menu_sign_out);
-            hideMenuItem(R.id.menu_leaderboard);
-            hideMenuItem(R.id.menu_achievements);
+//            showMenuItem(R.id.menu_sign_in);
+//            hideMenuItem(R.id.menu_sign_out);
+//            hideMenuItem(R.id.menu_leaderboard);
+//            hideMenuItem(R.id.menu_achievements);
             mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, FADE_IN);
             mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, FADE_IN);
         } else {
-            hideMenuItem(R.id.menu_sign_in);
-            showMenuItem(R.id.menu_sign_out);
-            showMenuItem(R.id.menu_leaderboard);
-            showMenuItem(R.id.menu_achievements);
+//            hideMenuItem(R.id.menu_sign_in);
+//            showMenuItem(R.id.menu_sign_out);
+//            showMenuItem(R.id.menu_leaderboard);
+//            showMenuItem(R.id.menu_achievements);
             mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, FADE_OUT);
             mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, FADE_OUT);
         }
@@ -210,10 +219,7 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "onConnected(): connected to Google APIs");
         // Show sign-out button on main menu
-        hideMenuItem(R.id.menu_sign_in);
-        showMenuItem(R.id.menu_sign_out);
-        showMenuItem(R.id.menu_leaderboard);
-        showMenuItem(R.id.menu_achievements);
+        setSignedInMode();
 
         // if we have accomplishments to push, push them
         if (!mOutbox.isEmpty()) {
@@ -245,8 +251,7 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         // Sign-in failed, so show sign-in button on main menu
-        showMenuItem(R.id.menu_sign_in);
-        hideMenuItem(R.id.menu_sign_out);
+        setSignedInMode();
     }
 
     private void hideMenuItem(int id) {
@@ -336,18 +341,6 @@ public class MainActivity extends AppCompatActivity implements
             Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_caught_napping));
             mOutbox.mCaughtNappingAchievement = false;
         }
-//        if (mOutbox.mArrogantAchievement) {
-//            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_arrogant));
-//            mOutbox.mArrogantAchievement = false;
-//        }
-//        if (mOutbox.mHumbleAchievement) {
-//            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_humble));
-//            mOutbox.mHumbleAchievement = false;
-//        }
-//        if (mOutbox.mLeetAchievement) {
-//            Games.Achievements.unlock(mGoogleApiClient, getString(R.string.achievement_leet));
-//            mOutbox.mLeetAchievement = false;
-//        }
         if (mOutbox.mScore > 0) {
             Games.Achievements.increment(mGoogleApiClient,
                     getString(R.string.achievement_and_i_would_walk_500_miles),
@@ -387,11 +380,11 @@ public class MainActivity extends AppCompatActivity implements
                 mOutbox.mScore);
     }
 
-//    private class setSigninState implements Runnable{
-////        private final GoogleApiClient mGoogleApiClient;
+//    private class setSigninState implements Runnable {
+//        //        private final GoogleApiClient mGoogleApiClient;
 //        private final boolean signIn;
 //
-//        public setSigninState(GoogleApiClient googleApiClient, boolean signIn){
+//        public setSigninState(GoogleApiClient googleApiClient, boolean signIn) {
 ////            mGoogleApiClient = googleApiClient;
 //            this.signIn = signIn;
 //        }
@@ -399,9 +392,9 @@ public class MainActivity extends AppCompatActivity implements
 //        @Override
 //        public void run() {
 //            mSignInClicked = signIn;
-//            if(signIn){
+//            if (signIn) {
 //                mGoogleApiClient.connect();
-//            }else{
+//            } else {
 //                mGoogleApiClient.disconnect();
 //            }
 //        }
