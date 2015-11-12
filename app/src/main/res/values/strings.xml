@@ -8,7 +8,7 @@
     <string name="achievement_prime_blah">Prime score!</string>
     <string name="sign_out">Sign Out</string>
     <string name="leaderboards">Leaderboards</string>
-    <string name="achievements">Achievements</string>
+    <string name="achievements">View Achievements</string>
     <string name="world_best">World Best</string>
     <string name="title_activity_settings">Settings</string>
 
@@ -69,4 +69,5 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="key_signed_in">sign_in</string>
 </resources>

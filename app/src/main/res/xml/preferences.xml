@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="pref_key_play_settings"
+        android:title="Google Play Services">
+        <Preference
+            android:defaultValue="false"
+            android:key="@string/key_signed_in"
+            android:summary="Signed in to Google Play"
+            android:title="Signed In" />
+        <Preference
+            android:key="leaderboards"
+            android:title="View Leaderboards">
+            <intent
+                android:action=""
+                android:data="http://www.example.com" />
+        </Preference>
+        <Preference
+            android:key="sign_in"
+            android:summary="Signed in to Google Play"
+            android:title="Signed In" />
+        <!--<CheckBoxPreference-->
+        <!--android:key="pref_key_auto_delete"-->
+        <!--android:summary="@string/pref_summary_auto_delete"-->
+        <!--android:title="@string/pref_title_auto_delete"-->
+        <!--android:defaultValue="false" />-->
+        <!--<Preference-->
+        <!--android:key="pref_key_sms_delete_limit"-->
+        <!--android:dependency="pref_key_auto_delete"-->
+        <!--android:summary="@string/pref_summary_delete_limit"-->
+        <!--android:title="@string/pref_title_sms_delete" />-->
+        <!--<Preference-->
+        <!--android:key="pref_key_mms_delete_limit"-->
+        <!--android:dependency="pref_key_auto_delete"-->
+        <!--android:summary="@string/pref_summary_delete_limit"-->
+        <!--android:title="@string/pref_title_mms_delete" />-->
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

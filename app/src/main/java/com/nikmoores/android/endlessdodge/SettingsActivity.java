@@ -4,6 +4,7 @@ package com.nikmoores.android.endlessdodge;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -19,9 +20,7 @@ import android.preference.RingtonePreference;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 
 import java.util.List;
 
@@ -37,33 +36,48 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+    static SharedPreferences mSharedPrefs;
+    public final String KEY_SIGNED_IN = getString(R.string.key_signed_in);
+
+    public interface SignInStateListener {
+        void setSignedIn(boolean signedIn);
+    }
+
+    static SignInStateListener mSignInStateListener = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupActionBar();
+        setContentView(R.layout.settings_fragment);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.content_frame, new SettingsFragment())
+                .commit();
+
+        mSharedPrefs = getPreferences(MODE_PRIVATE);
     }
 
-    /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
-     */
-    private void setupActionBar() {
-        int statusBarHeight = Utilities.getStatusBarHeight(getApplication());
-        int actionBarHeight = Utilities.getActionBarHeight(getApplication());
-
-        LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
-        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_toolbar, root, false);
-        root.addView(toolbar, 0); // Add Toolbar to top
-        // The trickery to get the text and back arrow aligned
-        toolbar.setPadding(0, statusBarHeight / 2, 0, -statusBarHeight / 2);
-        toolbar.setMinimumHeight(actionBarHeight + statusBarHeight);
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) toolbar.getLayoutParams();
-        params.height = actionBarHeight + statusBarHeight;
-
-        setSupportActionBar(toolbar);
-        // Show the Up button in the action bar.
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-    }
+//    /**
+//     * Alternate (original version of setting up ActionBar. Was used when SettingsActivity was
+//     * headers only.
+//     */
+//    private void setupActionBar() {
+//        int statusBarHeight = Utilities.getStatusBarHeight(getApplication());
+//        int actionBarHeight = Utilities.getActionBarHeight(getApplication());
+//
+//        LinearLayout root = (LinearLayout) findViewById(android.R.id.list).getParent().getParent().getParent();
+//        Toolbar toolbar = (Toolbar) LayoutInflater.from(this).inflate(R.layout.settings_fragment, root, false);
+//        root.addView(toolbar, 0); // Add Toolbar to top
+//        // The trickery to get the text and back arrow aligned
+//        toolbar.setPadding(0, statusBarHeight / 2, 0, -statusBarHeight / 2);
+//        toolbar.setMinimumHeight(actionBarHeight + statusBarHeight);
+//        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) toolbar.getLayoutParams();
+//        params.height = actionBarHeight + statusBarHeight;
+//
+//        setSupportActionBar(toolbar);
+//        // Show the Up button in the action bar.
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayShowHomeEnabled(true);
+//    }
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
@@ -101,7 +115,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
-        loadHeadersFromResource(R.xml.pref_headers, target);
+//        loadHeadersFromResource(R.xml.pref_headers, target);
     }
 
     /**
@@ -156,6 +170,35 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
     };
 
+    private static Preference.OnPreferenceClickListener onPreferenceClickListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+            String key = preference.getKey();
+            switch (key) {
+                case "sign_in":
+                    boolean state = mSharedPrefs.getBoolean("sign_in", false);
+                    mSignInStateListener.setSignedIn(state);
+                    break;
+            }
+            return false;
+        }
+    };
+
+    SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new
+            SharedPreferences.OnSharedPreferenceChangeListener() {
+                @Override
+                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+                                                      String key) {
+                    switch (key) {
+                        case "sign_in":
+                            boolean state = sharedPreferences.getBoolean(key, false);
+
+                            Preference signInPreference = findPreference(getString(R.string.key_signed_in));
+                            break;
+                    }
+                }
+            };
+
     /**
      * Binds a preference's summary to its value. More specifically, when the
      * preference's value is changed, its summary (line of text below the
@@ -186,6 +229,49 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || DataSyncPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName);
+    }
+
+    /**
+     * This fragment shows all preferences at present.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class SettingsFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.preferences);
+            setHasOptionsMenu(true);
+
+            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+            // to their values. When their values change, their summaries are
+            // updated to reflect the new value, per the Android Design
+            // guidelines.
+            Preference signInPreference = findPreference(getString(R.string.key_signed_in));
+            signInPreference.setOnPreferenceClickListener(onPreferenceClickListener);
+
+            setupActionBar();
+        }
+
+        /**
+         * Attach a Toolbar to act as ActionBar, complete with up/home functionality.
+         */
+        private void setupActionBar() {
+            Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.settings_toolbar);
+            ((SettingsActivity) getActivity()).setSupportActionBar(toolbar);
+            // Show the Up button in the action bar.
+            ((SettingsActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((SettingsActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+//
+//        @Override
+//        public boolean onOptionsItemSelected(MenuItem item) {
+//            int id = item.getItemId();
+//            if (id == android.R.id.home) {
+//                startActivity(new Intent(getActivity(), SettingsActivity.class));
+//                return true;
+//            }
+//            return super.onOptionsItemSelected(item);
+//        }
     }
 
     /**

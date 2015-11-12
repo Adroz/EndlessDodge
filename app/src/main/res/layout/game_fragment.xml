@@ -30,7 +30,16 @@
         android:elevation="4dp"
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        <!-- sign-in button -->
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:visibility="invisible"
+            tools:visibility="visible" />
+    </android.support.v7.widget.Toolbar>
 
     <com.nikmoores.android.endlessdodge.GameView
         android:id="@+id/game_view"
@@ -55,43 +64,38 @@
         android:orientation="vertical"
         tools:background="@android:color/holo_orange_light">
 
-        <LinearLayout
+        <Button
+            android:id="@+id/world_score"
+            style="@style/ScoreFormat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="start"
-            android:orientation="vertical">
+            android:drawableStart="@drawable/ic_public_24dp"
+            android:gravity="center_horizontal|center_vertical"
+            android:padding="10dp"
+            android:text="@string/number_zero"
+            tools:background="@android:color/holo_orange_dark"
+            tools:text="173" />
 
-            <TextView
-                android:id="@+id/world_score"
-                style="@style/ScoreFormat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_public_24dp"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@string/number_zero"
-                tools:text="173" />
+        <!--<TextView-->
+        <!--android:id="@+id/social_score"-->
+        <!--style="@style/ScoreFormat"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:drawableStart="@drawable/ic_people_outline_24dp"-->
+        <!--android:gravity="center_horizontal|center_vertical"-->
+        <!--android:text="@string/number_zero"-->
+        <!--tools:text="108" />-->
 
-            <TextView
-                android:id="@+id/social_score"
-                style="@style/ScoreFormat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_people_outline_24dp"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@string/number_zero"
-                tools:text="108" />
-
-            <TextView
-                android:id="@+id/user_score"
-                style="@style/ScoreFormat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_person_outline_24dp"
-                android:gravity="center_horizontal|center_vertical"
-                android:text="@string/number_zero"
-                tools:text="53" />
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/user_score"
+            style="@style/ScoreFormat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_person_outline_24dp"
+            android:gravity="center_horizontal|center_vertical"
+            android:padding="5dp"
+            android:text="@string/number_zero"
+            tools:text="53" />
 
         <TextView
             android:id="@+id/current_score"

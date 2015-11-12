@@ -29,8 +29,9 @@ public class Utilities {
     public static final String STATE_KEY = "state";
 
     /* Colour location constants */
-    public final static int COLOUR_LOCATION_LIGHT = 2;
+    public final static int COLOUR_LOCATION_LIGHT = 1;
     public final static int COLOUR_LOCATION_MAIN = 3;
+    public final static int COLOUR_LOCATION_SCORE = 4;
     public final static int COLOUR_LOCATION_DARK = 5;
 
     /* Screen values */

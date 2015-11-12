@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -19,9 +20,7 @@ import com.google.android.gms.plus.Plus;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.CURRENT_SCORE;
-import static com.nikmoores.android.endlessdodge.MainActivityFragment.FADE_IN;
-import static com.nikmoores.android.endlessdodge.MainActivityFragment.FADE_OUT;
-import static com.nikmoores.android.endlessdodge.MainActivityFragment.Listener;
+import static com.nikmoores.android.endlessdodge.MainActivityFragment.GameCompletedListener;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.NO_FADE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.SOCIAL_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.USER_SCORE;
@@ -29,7 +28,8 @@ import static com.nikmoores.android.endlessdodge.MainActivityFragment.WORLD_SCOR
 import static com.nikmoores.android.endlessdodge.Utilities.DEBUG_MODE;
 
 public class MainActivity extends AppCompatActivity implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, Listener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        GameCompletedListener {
 
     final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -57,6 +57,15 @@ public class MainActivity extends AppCompatActivity implements
     // Automatically start the sign-in flow when the Activity starts
     private boolean mAutoStartSignInFlow = true;
 
+    boolean mExplicitSignOut = false;
+    boolean mInSignInFlow = false; // set to true when you're in the middle of the
+    // sign in flow, to know you should not attempt
+    // to connect in onStart()
+
+    private static final boolean SHOW = true;
+    private static final boolean HIDE = false;
+    private static final int FADE_SPEED = 600;
+
     // request codes we use when invoking an external activity
     private static final int RC_SIGN_IN = 9001;
 
@@ -73,6 +82,26 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         preferences = getPreferences(Context.MODE_PRIVATE);
+
+        findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // start the asynchronous sign in flow
+                mSignInClicked = true;
+                mGoogleApiClient.connect();
+            }
+        });
+
+        findViewById(R.id.world_score).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isSignedIn()) {
+                    startActivityForResult(Games.Leaderboards.getLeaderboardIntent(
+                                    mGoogleApiClient, getString(R.string.leaderboard_leaderboard)),
+                            REQUEST_LEADERBOARD);
+                }
+            }
+        });
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -107,43 +136,31 @@ public class MainActivity extends AppCompatActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            // TODO: Add settings page. Options for colour removal, light/dark mode.
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        }
-
-//        switch (id) {
+        switch (id) {
 //            case R.id.action_settings:
-//                // TODO: Add settings page. Options for colour removal, light/dark mode.
-//                startActivity(new Intent(this, SettingsActivity.class));
-//                return true;
-//            case R.id.menu_sign_in:
-//                // TODO: Fix InputEventReciever issue here.
-//                mSignInClicked = true;
-//                mGoogleApiClient.connect();
-//                mHandler.postDelayed(new setSigninState(mGoogleApiClient, true), 100);
-//                return true;
-//            case R.id.menu_sign_out:
-//                Log.d(LOG_TAG, "Sign out pressed");
-//                mSignInClicked = false;
-//                mGoogleApiClient.disconnect();
-//                mHandler.postDelayed(new setSigninState(mGoogleApiClient, false), 100);
-//                return true;
-//            case R.id.menu_leaderboard:
-//                if (isSignedIn()) {
-//                    startActivityForResult(Games.Leaderboards.getLeaderboardIntent(
-//                                    mGoogleApiClient, getString(R.string.leaderboard_leaderboard)),
-//                            REQUEST_LEADERBOARD);
-//                }
-//                return true;
-//            case R.id.menu_achievements:
-//                if (isSignedIn()) {
-//                    startActivityForResult(Games.Achievements.getAchievementsIntent(
-//                            mGoogleApiClient), REQUEST_ACHIEVEMENTS);
-//                }
-//                return true;
-//        }
+//            // TODO: Add settings page. Options for colour removal, light/dark mode.
+//            startActivity(new Intent(this, SettingsActivity.class));
+//            return true;
+            case R.id.menu_sign_out:
+                // user explicitly signed out, so turn off auto sign in
+                mExplicitSignOut = true;
+                if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                    Games.signOut(mGoogleApiClient);
+                    mGoogleApiClient.disconnect();
+                    // show sign-in button, hide the sign-out button
+                    item.setVisible(false);
+                    menu.findItem(R.id.menu_achievements).setVisible(HIDE);
+                    findViewById(R.id.world_score).setVisibility(View.GONE);
+                    findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+                }
+                break;
+            case R.id.menu_achievements:
+                if (isSignedIn()) {
+                    startActivityForResult(Games.Achievements.getAchievementsIntent(
+                            mGoogleApiClient), REQUEST_ACHIEVEMENTS);
+                }
+                return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -151,7 +168,10 @@ public class MainActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
         Log.d(LOG_TAG, "onStart(): connecting");
-        mGoogleApiClient.connect();
+        if (!mInSignInFlow && !mExplicitSignOut) {
+            // auto sign in
+            mGoogleApiClient.connect();
+        }
     }
 
     @Override
@@ -181,24 +201,6 @@ public class MainActivity extends AppCompatActivity implements
         return (mGoogleApiClient != null && mGoogleApiClient.isConnected());
     }
 
-    private void setSignedInMode() {
-        if (isSignedIn()) {
-//            showMenuItem(R.id.menu_sign_in);
-//            hideMenuItem(R.id.menu_sign_out);
-//            hideMenuItem(R.id.menu_leaderboard);
-//            hideMenuItem(R.id.menu_achievements);
-            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, FADE_IN);
-            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, FADE_IN);
-        } else {
-//            hideMenuItem(R.id.menu_sign_in);
-//            showMenuItem(R.id.menu_sign_out);
-//            showMenuItem(R.id.menu_leaderboard);
-//            showMenuItem(R.id.menu_achievements);
-            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, FADE_OUT);
-            mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, FADE_OUT);
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -218,8 +220,12 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "onConnected(): connected to Google APIs");
-        // Show sign-out button on main menu
-        setSignedInMode();
+
+        // show sign-out button, hide the sign-in button
+        findViewById(R.id.sign_in_button).setVisibility(View.INVISIBLE);
+        findViewById(R.id.world_score).setVisibility(View.VISIBLE);
+        menu.findItem(R.id.menu_sign_out).setVisible(SHOW);
+        menu.findItem(R.id.menu_achievements).setVisible(SHOW);
 
         // if we have accomplishments to push, push them
         if (!mOutbox.isEmpty()) {
@@ -230,7 +236,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(LOG_TAG, "onConnectionSuspended(): attempting to connect");
-        setSignedInMode();
         mGoogleApiClient.connect();
     }
 
@@ -251,17 +256,10 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         // Sign-in failed, so show sign-in button on main menu
-        setSignedInMode();
-    }
-
-    private void hideMenuItem(int id) {
-        MenuItem item = menu.findItem(id);
-        item.setVisible(false);
-    }
-
-    private void showMenuItem(int id) {
-        MenuItem item = menu.findItem(id);
-        item.setVisible(true);
+        findViewById(R.id.world_score).setVisibility(View.GONE);
+        findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
+        menu.findItem(R.id.menu_sign_out).setVisible(HIDE);
+        menu.findItem(R.id.menu_achievements).setVisible(HIDE);
     }
 
     @Override
@@ -301,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements
         // Pull world best
         pullLeaderboards(LeaderboardVariant.COLLECTION_PUBLIC, mOutbox.mWorldBest, WORLD_SCORE);
         // Pull social best
-        pullLeaderboards(LeaderboardVariant.COLLECTION_SOCIAL, mOutbox.mSocialBest, SOCIAL_SCORE);
+//        pullLeaderboards(LeaderboardVariant.COLLECTION_SOCIAL, mOutbox.mSocialBest, SOCIAL_SCORE);
 
         mOutbox.saveLocal();
     }
@@ -379,26 +377,6 @@ public class MainActivity extends AppCompatActivity implements
                 getString(R.string.leaderboard_leaderboard),
                 mOutbox.mScore);
     }
-
-//    private class setSigninState implements Runnable {
-//        //        private final GoogleApiClient mGoogleApiClient;
-//        private final boolean signIn;
-//
-//        public setSigninState(GoogleApiClient googleApiClient, boolean signIn) {
-////            mGoogleApiClient = googleApiClient;
-//            this.signIn = signIn;
-//        }
-//
-//        @Override
-//        public void run() {
-//            mSignInClicked = signIn;
-//            if (signIn) {
-//                mGoogleApiClient.connect();
-//            } else {
-//                mGoogleApiClient.disconnect();
-//            }
-//        }
-//    }
 
     class Outbox {
         boolean mCaughtNappingAchievement = false;

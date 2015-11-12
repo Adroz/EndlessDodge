@@ -42,6 +42,8 @@ import java.util.Random;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
 
+import static com.nikmoores.android.endlessdodge.Utilities.COLOUR_LOCATION_SCORE;
+import static com.nikmoores.android.endlessdodge.Utilities.DEBUG_MODE;
 import static com.nikmoores.android.endlessdodge.Utilities.FAB_X;
 import static com.nikmoores.android.endlessdodge.Utilities.FAB_Y;
 import static com.nikmoores.android.endlessdodge.Utilities.screenHeight;
@@ -93,7 +95,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private View mToolbarView;
 
     private TextView mWorldScore;
-    private TextView mSocialScore;
+    //    private TextView mSocialScore;
     private TextView mUserScore;
     private TextView mCurrentScore;
 
@@ -117,11 +119,11 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
     }
 
-    public interface Listener {
+    public interface GameCompletedListener {
         void updateAccomplishments(int score);
     }
 
-    Listener mListener = null;
+    GameCompletedListener mGameCompletedListener = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -163,7 +165,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         // Initialise scores.
         mWorldScore = (TextView) view.findViewById(R.id.world_score);
-        mSocialScore = (TextView) view.findViewById(R.id.social_score);
+//        mSocialScore = (TextView) view.findViewById(R.id.social_score);
         mUserScore = (TextView) view.findViewById(R.id.user_score);
         mCurrentScore = (TextView) view.findViewById(R.id.current_score);
         mCurrentScore.setText("0");
@@ -248,8 +250,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         Log.w(LOG_TAG, "sIS called");
     }
 
-    public void setListener(Listener l) {
-        mListener = l;
+    public void setListener(GameCompletedListener l1) {
+        mGameCompletedListener = l1;
     }
 
     private void initDimensions() {
@@ -303,6 +305,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mAltBackground.setBackgroundColor(colourSet.primaryColour);
         mTempToolbar.setBackgroundColor(colourSet.primaryColourDark);
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
+        mWorldScore.setBackgroundColor(colourSet.getPrimaryColour(COLOUR_LOCATION_SCORE));
     }
 
     private void onGameStart() {
@@ -369,7 +372,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mGameLoop.setState(GameLoop.STATE_END);
 
         // Set score.
-        mListener.updateAccomplishments(finalScore);
+        mGameCompletedListener.updateAccomplishments(finalScore);
 
         // Generate new colours as the FAB will get a new colour.
         colourSet.setGameColours();
@@ -383,17 +386,18 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setVisibility(View.INVISIBLE);
         mFab.clearAnimation();
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
+        mWorldScore.setBackgroundColor(colourSet.getPrimaryColour(COLOUR_LOCATION_SCORE));
 
         mFab.setOnClickListener(this);
     }
 
     public void updateScoreViews(int view, float score, int fadeType) {
-//        Log.d(LOG_TAG, "Updating score (" + view + "): " + score);
+        if (DEBUG_MODE) Log.d(LOG_TAG, "Updating score (" + view + "): " + score);
         TextView textView = mCurrentScore;
         if (view == WORLD_SCORE) {
             textView = mWorldScore;
-        } else if (view == SOCIAL_SCORE) {
-            textView = mSocialScore;
+//        } else if (view == SOCIAL_SCORE) {
+//            textView = mSocialScore;
         } else if (view == USER_SCORE) {
             textView = mUserScore;
         }
