@@ -517,6 +517,7 @@ public class GameLoop extends Thread {
         tempCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
         if (mMode == STATE_STARTING) {
+            // TODO: Change this to have the walls animating in from the sides
             // Animate wall pairs in.
             long now = System.currentTimeMillis();
             if (mLastTime > now) return;

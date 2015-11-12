@@ -70,7 +70,7 @@ public class Utilities {
 
         WALL_HEIGHT = screenHeight / NUMBER_OF_WALLS;
         MIN_HEIGHT = screenHeight / 10;
-        Log.d("Utilities", "screen: " + screenWidth + "/" + screenHeight);
+        if (DEBUG_MODE) Log.d("Utilities", "screen: " + screenWidth + "/" + screenHeight);
 
         PHYS_X_MAX_SPEED = screenWidth / 2 - screenWidth / 25;
         PHYS_X_ACCEL_SEC = PHYS_X_MAX_SPEED * 4;
@@ -87,7 +87,8 @@ public class Utilities {
         // Set wall width.
         int minWidth = FAB_RADIUS * 9;
         WALL_WIDTH = (FAB_RADIUS * 11 - minWidth) + minWidth;
-        Log.d(LOG_TAG, "FAB location: " + FAB_X + "," + FAB_Y + " & FAB radius = " + FAB_RADIUS);
+        if (DEBUG_MODE)
+            Log.d(LOG_TAG, "FAB location: " + FAB_X + "," + FAB_Y + " & FAB radius = " + FAB_RADIUS);
     }
 
     public static List<int[]> get2dResourceArray(Context context, String key) {

@@ -78,13 +78,11 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
     // Screen and View dimensioning
     private static int maxBackgroundSize;
-    //    private static int screenX;
-//    private static int screenY;
     public static int[] fabStartLocation = new int[2];
     public static int[] fabEndLocation = new int[]{0, 0};
     private static float fabScale;
     private static int fabRadius;
-    private static int statusBarOffset;  // Only > 0 when API is <21 (should be tested and confirmed).
+    private static int statusBarOffset;
 
     private static boolean animationFlag = false;
 
@@ -278,6 +276,13 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
             public void run() {
                 // Get the final radius for the clipping circle
                 maxBackgroundSize = Math.max(mAltBackground.getWidth(), mAltBackground.getHeight());
+                // StatusBar only > 0 when API is <21 (should be tested and confirmed).
+                statusBarOffset = screenHeight - mAltBackground.getHeight();
+                fabEndLocation[1] -= statusBarOffset;
+                Utilities.setFabMeasurements(
+                        screenWidth / 2,
+                        mFab.getHeight() / 2 + fabEndLocation[1],
+                        fabRadius);
             }
         });
     }
@@ -508,11 +513,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fab:      // Handle FAB click listener.
-//                if (!running) {
                 onGameStart();
-//                } else {
-//                    onGameStop();
-//                }
         }
     }
 
