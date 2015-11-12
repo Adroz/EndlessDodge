@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -250,8 +249,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         Log.w(LOG_TAG, "sIS called");
     }
 
-    public void setListener(GameCompletedListener l1) {
-        mGameCompletedListener = l1;
+    public void setListener(GameCompletedListener l) {
+        mGameCompletedListener = l;
     }
 
     private void initDimensions() {
@@ -320,7 +319,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setOnClickListener(null);
 
         // TODO: Fix this so I can support API 16. (1/2)
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+//        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
         // TODO: Possibly add colour change animation - make FAB start as a 500 colour (darker).
         // Animate to game start position.
@@ -394,6 +393,9 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void updateScoreViews(int view, float score, int fadeType) {
         if (DEBUG_MODE) Log.d(LOG_TAG, "Updating score (" + view + "): " + score);
         TextView textView = mCurrentScore;
+        if (score < 1) {
+            score = 0;
+        }
         if (view == WORLD_SCORE) {
             textView = mWorldScore;
 //        } else if (view == SOCIAL_SCORE) {
@@ -459,7 +461,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                     mGameLoop.setColour(colourSet.primarySet);
                     setToolbarColour(colourSet.primaryColourDark);
                     // Unlock screen rotation. // TODO: Fix this so I can support API 16. (2/2)
-                    getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+//                    getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                    // TODO: Uncomment above when landscape mode is enabled.
                 }
                 animationFlag = true;
             }

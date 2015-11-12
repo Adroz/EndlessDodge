@@ -22,7 +22,7 @@ public class WallPair {
 
     public static final int LEFT_WALL = 0;
     public static final int RIGHT_WALL = 1;
-    public static final int PERCENT_CHANCE_SAME = 80;
+    public static final int PERCENT_CHANCE_SAME = 77;
 
     private int height;
     private int width;

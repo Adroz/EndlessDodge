@@ -73,10 +73,10 @@ public class Utilities {
         MIN_HEIGHT = screenHeight / 10;
         if (DEBUG_MODE) Log.d("Utilities", "screen: " + screenWidth + "/" + screenHeight);
 
-        PHYS_X_MAX_SPEED = screenWidth / 2 - screenWidth / 25;
-        PHYS_X_ACCEL_SEC = PHYS_X_MAX_SPEED * 4;
         //noinspection SuspiciousNameCombination
-        SCROLLING_Y_SPEED = screenWidth / 2;
+        SCROLLING_Y_SPEED = (int) (screenHeight / 2);
+        PHYS_X_MAX_SPEED = SCROLLING_Y_SPEED - screenHeight / 20;
+        PHYS_X_ACCEL_SEC = PHYS_X_MAX_SPEED * 4;
     }
 
 

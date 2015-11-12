@@ -25,7 +25,6 @@ import static com.nikmoores.android.endlessdodge.MainActivityFragment.NO_FADE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.SOCIAL_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.USER_SCORE;
 import static com.nikmoores.android.endlessdodge.MainActivityFragment.WORLD_SCORE;
-import static com.nikmoores.android.endlessdodge.Utilities.DEBUG_MODE;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -110,12 +109,6 @@ public class MainActivity extends AppCompatActivity implements
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .setViewForPopups(findViewById(R.id.fragment))
                 .build();
-
-        if (DEBUG_MODE) {
-            // FOR TESTING ONLY - Reset mOutbox
-            mOutbox.reset();
-            mOutbox.saveLocal();
-        }
 
         // Create fragment and listen
         mMainActivityFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
@@ -229,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // if we have accomplishments to push, push them
         if (!mOutbox.isEmpty()) {
+            Log.d(LOG_TAG, "mOutbox is not empty, pushing values (score:" + mOutbox.mScore + ")");
             pushAchievements();
         }
     }
@@ -316,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements
                 float topScore = loadScoresResult.getScores().get(0).getRawScore();
                 if (topScore > currentBestScore) {
                     if (view == SOCIAL_SCORE) {
-                        mOutbox.mSocialBest = topScore;
+//                        mOutbox.mSocialBest = topScore;
                     } else {
                         mOutbox.mWorldBest = topScore;
                     }
@@ -360,10 +354,10 @@ public class MainActivity extends AppCompatActivity implements
             mOutbox.mBest = mOutbox.mScore;
             mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
         }
-        if (mOutbox.mScore > mOutbox.mSocialBest) {
-            mOutbox.mSocialBest = mOutbox.mScore;
-            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, NO_FADE);
-        }
+//        if (mOutbox.mScore > mOutbox.mSocialBest) {
+//            mOutbox.mSocialBest = mOutbox.mScore;
+//            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, NO_FADE);
+//        }
         if (mOutbox.mScore > mOutbox.mWorldBest) {
             mOutbox.mWorldBest = mOutbox.mScore;
             mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, NO_FADE);
@@ -384,9 +378,9 @@ public class MainActivity extends AppCompatActivity implements
         boolean mLeetAchievement = false;
         boolean mArrogantAchievement = false;
         int mTotalDistance = 0;
-        int mScore = 0;
+        int mScore = -1;
         float mWorldBest = 0;
-        float mSocialBest = 0;
+        //        float mSocialBest = 0;
         float mBest = 0;
 
         void reset() {
@@ -395,36 +389,36 @@ public class MainActivity extends AppCompatActivity implements
             mLeetAchievement = false;
             mArrogantAchievement = false;
             mTotalDistance = 0;
-            mScore = 0;
+            mScore = -1;
             mWorldBest = 0;
-            mSocialBest = 0;
+//            mSocialBest = 0;
             mBest = 0;
         }
 
         boolean isEmpty() {
             return !mCaughtNappingAchievement && !mHumbleAchievement && !mLeetAchievement &&
-                    !mArrogantAchievement;
+                    !mArrogantAchievement && mScore < 0;
         }
 
         public void saveLocal() {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putFloat(WORLD_BEST, mWorldBest)
-                    .putFloat(SOCIAL_BEST, mSocialBest)
+//                    .putFloat(SOCIAL_BEST, mSocialBest)
                     .putFloat(PERSONAL_BEST, mBest)
-                    .putInt(LAST_SCORE, mScore)
+//                    .putInt(LAST_SCORE, mScore)
                     .putInt(TOTAL_DISTANCE, mTotalDistance)
                     .apply();
         }
 
         public void loadLocal() {
             mWorldBest = preferences.getFloat(WORLD_BEST, 0);
-            mSocialBest = preferences.getFloat(SOCIAL_BEST, 0);
+//            mSocialBest = preferences.getFloat(SOCIAL_BEST, 0);
             mBest = preferences.getFloat(PERSONAL_BEST, 0);
-            mScore = preferences.getInt(LAST_SCORE, 0);
+//            mScore = preferences.getInt(LAST_SCORE, 0);
             mTotalDistance = preferences.getInt(TOTAL_DISTANCE, 0);
-            mMainActivityFragment.updateScoreViews(CURRENT_SCORE, mOutbox.mScore, NO_FADE);
+            mMainActivityFragment.updateScoreViews(CURRENT_SCORE, 0, NO_FADE);
             mMainActivityFragment.updateScoreViews(WORLD_SCORE, mOutbox.mWorldBest, NO_FADE);
-            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, NO_FADE);
+//            mMainActivityFragment.updateScoreViews(SOCIAL_SCORE, mOutbox.mSocialBest, NO_FADE);
             mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
         }
     }
