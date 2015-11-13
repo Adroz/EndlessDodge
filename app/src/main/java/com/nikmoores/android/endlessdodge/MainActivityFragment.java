@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -17,9 +18,12 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -67,7 +71,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     final static int DEATH_ANIMATION_SPEED = 1000;
     final static int RESTART_ANIMATION_SPEED = 1000;
     final static int START_ANIMATION_SPEED = 400;
-    final static int START_ANIMATION_LONG_DELAY = 400;
     final static int START_ANIMATION_SHORT_DELAY = 0;
 
     final static int NO_FADE = 0;
@@ -98,11 +101,11 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private TextView mUserScore;
     private TextView mCurrentScore;
 
-    //    private TextView xValue;
-//    private TextView yValue;
-//    private TextView zValue;
+    // Sensor and screen orientation variables
     private SensorManager sensorManager = null;
-    private int mXValue;
+    private int mAxis = 0;
+    private int mSensorDirection = 1;
+    private int mSensorValue;
 
     /**
      * A handle to the thread that's actually running the animation.
@@ -174,12 +177,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         mGameView.setListener(this);
         mGameLoop = mGameView.getThread();
-
-        //TODO: For testing, delete me.
-//        mGameView.setTextView((TextView) view.findViewById(R.id.test_text));
-//        xValue = (TextView) view.findViewById(R.id.x_value);
-//        yValue = (TextView) view.findViewById(R.id.y_value);
-//        zValue = (TextView) view.findViewById(R.id.z_value);
 
         if (savedInstanceState == null) {
             // Game just started, therefore set up a new game.
@@ -312,14 +309,16 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
         // Randomise initial acceleration direction.
         int[] val = new int[]{-1, 1};
-        mXValue = val[new Random().nextInt(val.length)];
-        mGameLoop.setDirection(mXValue);
+        mSensorValue = val[new Random().nextInt(val.length)];
+        mGameLoop.setDirection(mSensorValue);
 
         // Disable FAB while the game is running. // TODO: Still need to clean this up, button is not in centre.
         mFab.setOnClickListener(null);
 
-        // TODO: Fix this so I can support API 16. (1/2)
-//        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);  // TODO: Fix this so I can support API 16. (1/2)
+        Display display = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE))
+                .getDefaultDisplay();
+        setAxis(display.getRotation());
 
         // TODO: Possibly add colour change animation - make FAB start as a 500 colour (darker).
         // Animate to game start position.
@@ -412,6 +411,31 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 
     }
 
+    private void setAxis(int rotation) {
+        final int X_AXIS = 0;
+        final int Y_AXIS = 1;
+        final int POSITIVE = 1;
+        final int NEGATIVE = -1;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                mAxis = X_AXIS;
+                mSensorDirection = POSITIVE;
+                break;
+            case Surface.ROTATION_90:
+                mAxis = Y_AXIS;
+                mSensorDirection = NEGATIVE;
+                break;
+            case Surface.ROTATION_180:
+                mAxis = X_AXIS;
+                mSensorDirection = NEGATIVE;
+                break;
+            case Surface.ROTATION_270:
+                mAxis = Y_AXIS;
+                mSensorDirection = POSITIVE;
+                break;
+        }
+    }
+
     private void animateBackgroundFade(final View view, final int colour) {
         AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
         alphaAnimation.setDuration(START_ANIMATION_SPEED);
@@ -461,8 +485,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                     mGameLoop.setColour(colourSet.primarySet);
                     setToolbarColour(colourSet.primaryColourDark);
                     // Unlock screen rotation. // TODO: Fix this so I can support API 16. (2/2)
-//                    getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                    // TODO: Uncomment above when landscape mode is enabled.
+                    getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 }
                 animationFlag = true;
             }
@@ -528,18 +551,13 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onSensorChanged(SensorEvent event) {
         synchronized (this) {
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-//                xValue.setText(Float.toString(event.values[0]));
-//                yValue.setText(Float.toString(event.values[1]));
-//                zValue.setText(Float.toString(event.values[2]));
-
-                // TODO: Add support for landscape mode.
-
                 // IMPORTANT: mDirection is equal to negative direction. This helps with drawing
                 // (ie: right is +ve, just as in the canvas).
-                int xDirection = (-Math.ceil(event.values[0]) < 0) ? 1 : -1;
-                if (mXValue != xDirection) {
-                    mXValue = xDirection;
-                    mGameLoop.setDirection(mXValue);
+                int sensorDirection =
+                        (-mSensorDirection * Math.ceil(event.values[mAxis]) < 0) ? 1 : -1;
+                if (mSensorValue != sensorDirection) {
+                    mSensorValue = sensorDirection;
+                    mGameLoop.setDirection(mSensorValue);
                 }
             }
         }

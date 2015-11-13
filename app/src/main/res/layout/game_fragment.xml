@@ -106,43 +106,4 @@
             tools:text="28" />
 
     </LinearLayout>
-
-    <!--<View-->
-    <!--android:id="@+id/temp_bg"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:elevation="3dp"-->
-    <!--tools:background="@android:color/holo_orange_light" />-->
-
-
-    <!--<LinearLayout-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:orientation="horizontal"-->
-    <!--android:elevation="10dp"-->
-    <!--android:gravity="bottom">-->
-
-    <!--<TextView-->
-    <!--android:id="@+id/x_value"-->
-    <!--android:layout_width="0dp"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_weight="1"-->
-    <!--android:text="X Value: "-->
-    <!--android:textSize="20sp" />-->
-    <!--<TextView-->
-    <!--android:id="@+id/y_value"-->
-    <!--android:layout_width="0dp"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_weight="1"-->
-    <!--android:text="Y Value: "-->
-    <!--android:textSize="20sp" />-->
-    <!--<TextView-->
-    <!--android:id="@+id/z_value"-->
-    <!--android:layout_width="0dp"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_weight="1"-->
-    <!--android:text="Z Value: "-->
-    <!--android:textSize="20sp" />-->
-    <!--</LinearLayout>-->
-
 </io.codetail.widget.RevealFrameLayout>
