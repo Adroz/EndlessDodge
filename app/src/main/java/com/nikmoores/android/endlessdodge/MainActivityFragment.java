@@ -30,11 +30,6 @@ import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.daimajia.easing.Glider;
-import com.daimajia.easing.Skill;
-import com.nineoldandroids.animation.AnimatorSet;
-import com.nineoldandroids.animation.ObjectAnimator;
-
 import java.util.List;
 import java.util.Random;
 
@@ -483,14 +478,20 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     private void animateFabIn(long startDelay) {
         // If this animation has finished first, animate the FAB in from the bottom
         // of the screen.
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(Glider.glide(
-                Skill.ElasticEaseOut,
-                1,
-                ObjectAnimator.ofFloat(mFab, "translationY", fabRadius * 3, 0)));
-        set.setDuration(RESTART_ANIMATION_SPEED);
-        set.setStartDelay(startDelay);
-        set.start();
+        // Fixme: This causes crashing in the APK release.
+//        AnimatorSet set = new AnimatorSet();
+//        set.playTogether(Glider.glide(
+//                Skill.ElasticEaseOut,
+//                RESTART_ANIMATION_SPEED,
+//                ObjectAnimator.ofFloat(mFab, "translationY", fabRadius * 3, 0)));
+//        set.setDuration(RESTART_ANIMATION_SPEED);
+//        set.setStartDelay(startDelay);
+//        set.start();
+        TranslateAnimation animation = new TranslateAnimation(0, 0, fabRadius * 3, 0);
+        animation.setInterpolator(new DecelerateInterpolator());
+        animation.setDuration(RESTART_ANIMATION_SPEED / 2);
+        animation.setStartOffset(startDelay);
+        mFab.setAnimation(animation);
         mFab.setVisibility(View.VISIBLE);
     }
 
