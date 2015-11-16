@@ -1,8 +1,6 @@
 package com.nikmoores.android.endlessdodge;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -44,14 +42,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         mContext = context;
 
         // Create game loop thread. Actually started in SurfaceCreated().
-        gameLoop = new GameLoop(holder, context, new Handler() {
-            @Override
-            public void handleMessage(Message m) {
-                //noinspection ResourceType
-//                mStatusText.setVisibility(mCaughtNappingAchievement.getData().getInt("viz"));
-//                mStatusText.setText(mCaughtNappingAchievement.getData().getString("text"));
-            }
-        });
+        gameLoop = new GameLoop(holder, context);
         // To ensure key events received.
         setFocusable(true);
     }
@@ -74,17 +65,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         if (!hasWindowFocus) gameLoop.pause();
     }
 
-    /**
-     * Installs a pointer to the text view used for messages.
-     */
-    public void setTextView(TextView textView) {
-        mStatusText = textView;
-    }
-
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         if (gameLoop.getState() != Thread.State.NEW) {
-            gameLoop = new GameLoop(holder, mContext, null);
+            gameLoop = new GameLoop(holder, mContext);
             mListener.updateGameLoop();
         }
         gameLoop.setRunning(true);

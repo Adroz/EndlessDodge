@@ -36,6 +36,7 @@ import android.widget.TextView;
 
 import com.daimajia.easing.Glider;
 import com.daimajia.easing.Skill;
+import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
 
@@ -130,9 +131,10 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Utilities.setScreenDimensions(getContext());
+
         View rootView = inflater.inflate(R.layout.game_fragment, container, false);
 
-        Utilities.setScreenDimensions(getContext());
         initViews(rootView, savedInstanceState);
         initDimensions();
         initColours();
@@ -259,6 +261,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                 // TODO: Restructure this at some stage because this is bad.
                 mFab.getLocationOnScreen(fabStartLocation);
                 fabScale = (screenHeight / 8) / (float) mFab.getHeight();
+//                Log.v(LOG_TAG, "screenHeight: " + screenHeight + ", mFab.getHeight: " + mFab.getHeight() + ", fabScale: " + fabScale);
                 fabRadius = (int) (mFab.getHeight() * fabScale / 2);
                 fabEndLocation[0] = (screenWidth - mFab.getHeight()) / 2;
                 fabEndLocation[1] = (int) (screenHeight - fabRadius * 1.75);
@@ -272,6 +275,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mAltBackground.post(new Runnable() {
             @Override
             public void run() {
+                Log.v(LOG_TAG, "mAltBackground ready.");
                 // Get the final radius for the clipping circle
                 maxBackgroundSize = Math.max(mAltBackground.getWidth(), mAltBackground.getHeight());
                 // StatusBar only > 0 when API is <21 (should be tested and confirmed).
@@ -354,7 +358,6 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.startAnimation(animation);
 
         animateBackgroundFade(mAltBackground, colourSet.secondaryColour);
-
         animateBackgroundFade(mTempToolbar, colourSet.secondaryColourDark);
     }
 
@@ -386,7 +389,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         mFab.setBackgroundTintList(ColorStateList.valueOf(colourSet.secondaryColour));
         mWorldScore.setBackgroundColor(colourSet.getPrimaryColour(COLOUR_LOCATION_SCORE));
 
-        mFab.setOnClickListener(this);
+//        mFab.setOnClickListener(this);
     }
 
     public void updateScoreViews(int view, float score, int fadeType) {
@@ -513,6 +516,28 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                 ObjectAnimator.ofFloat(mFab, "translationY", fabRadius * 3, 0)));
         set.setDuration(RESTART_ANIMATION_SPEED);
         set.setStartDelay(startDelay);
+        set.addListener(new Animator.AnimatorListener() {
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mFab.setOnClickListener(MainActivityFragment.this);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
         set.start();
         mFab.setVisibility(View.VISIBLE);
     }

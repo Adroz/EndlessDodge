@@ -25,11 +25,12 @@ import static com.nikmoores.android.endlessdodge.Utilities.DEBUG_MODE;
 import static com.nikmoores.android.endlessdodge.Utilities.FAB_RADIUS;
 import static com.nikmoores.android.endlessdodge.Utilities.FAB_X;
 import static com.nikmoores.android.endlessdodge.Utilities.FAB_Y;
-import static com.nikmoores.android.endlessdodge.Utilities.MAX_WIDTH;
+import static com.nikmoores.android.endlessdodge.Utilities.NUMBER_OF_WALLS;
 import static com.nikmoores.android.endlessdodge.Utilities.PHYS_X_ACCEL_SEC;
 import static com.nikmoores.android.endlessdodge.Utilities.PHYS_X_MAX_SPEED;
 import static com.nikmoores.android.endlessdodge.Utilities.SCROLLING_Y_SPEED;
 import static com.nikmoores.android.endlessdodge.Utilities.WALL_HEIGHT;
+import static com.nikmoores.android.endlessdodge.Utilities.WALL_WIDTH;
 import static com.nikmoores.android.endlessdodge.Utilities.screenHeight;
 import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
 import static com.nikmoores.android.endlessdodge.WallPairComparator.ELEVATION_SORT;
@@ -202,10 +203,9 @@ public class GameLoop extends Thread {
     private final Object mRunLock = new Object();
 
 
-    public GameLoop(SurfaceHolder holder, Context context, Handler handler) {
+    public GameLoop(SurfaceHolder holder, Context context) {
         mSurfaceHolder = holder;
         mContext = context;
-//        mHandler = handler;
 
         // Initialise variables.
         mLinePaint = new Paint();
@@ -218,8 +218,6 @@ public class GameLoop extends Thread {
         radialGradient.setGradientType(GradientDrawable.RADIAL_GRADIENT);
         radialGradient.setColors(colors);
         radialGradient.setGradientRadius(BASE_SHADOW_LENGTH);
-
-//        doReset();
     }
 
     @Override
@@ -295,7 +293,7 @@ public class GameLoop extends Thread {
             if (mWallPairs.size() == 0) {
                 // If no walls, create wall set.
                 int i;
-                for (i = 0; i < Utilities.NUMBER_OF_WALLS - 1; i++) {
+                for (i = 0; i < NUMBER_OF_WALLS - 1; i++) {
                     int top = screenHeight - WALL_HEIGHT * i;
                     // Create wall pairs
                     mWallPairs.add(new WallPair(new Random().nextBoolean(), 0, top));
@@ -303,7 +301,7 @@ public class GameLoop extends Thread {
                     int wallPairTop = mWallPairs.get(i).getTop();
                     if (wallPairTop < FAB_Y && (wallPairTop + WALL_HEIGHT) > FAB_Y) {
                         // Set that wall pair to horizontal centre.
-                        mWallPairs.get(i).setXOffset((screenWidth - MAX_WIDTH) / 2);
+                        mWallPairs.get(i).setXOffset((screenWidth - WALL_WIDTH) / 2);
                         for (int j = 0; j < i; j++) {
                             // Reset previously generated walls to be offset to centre pair.
                             WallPair wallPair = mWallPairs.get(i - j - 1);
@@ -316,7 +314,7 @@ public class GameLoop extends Thread {
                     }
                 }
                 // All new walls are offset according to centre wall pair.
-                for (int k = i; k < Utilities.NUMBER_OF_WALLS - 1; k++) {
+                for (int k = i; k < NUMBER_OF_WALLS - 1; k++) {
                     mWallPairs.add(new WallPair(mWallPairs.get(k).getDirection(),
                             mWallPairs.get(k).getLeftEdge(),
                             mWallPairs.get(k).getTop()));
@@ -326,7 +324,7 @@ public class GameLoop extends Thread {
                 // Get pair inline with FAB, and calculate the offset needed to align to centre.
                 for (WallPair wallPair : mWallPairs) {
                     if (wallPair.getTop() < FAB_Y && (wallPair.getBottom()) > FAB_Y) {
-                        offset = (screenWidth - MAX_WIDTH) / 2 - wallPair.getLeftEdge();
+                        offset = (screenWidth - WALL_WIDTH) / 2 - wallPair.getLeftEdge();
                         break;
                     }
                 }
@@ -393,50 +391,10 @@ public class GameLoop extends Thread {
      */
     public void setState(int mode) {
         synchronized (mSurfaceHolder) {
-            setState(mode, null);
-        }
-    }
-
-    /**
-     * Sets the game mode. That is, whether we are running, paused, in the
-     * failure state, in the victory state, etc.
-     *
-     * @param mode    one of the STATE_* constants
-     * @param message string to add to screen or null
-     */
-    public void setState(int mode, CharSequence message) {
-        synchronized (mSurfaceHolder) {
-            mMode = mode;
             Log.v(LOG_TAG, "setState called: " + mode);
-            if (mMode == STATE_RUNNING) {
-//                // TODO: For testing, delete me.
-//                Message msg = mHandler.obtainMessage();
-//                Bundle b = new Bundle();
-//                b.putString("text", "");
-//                b.putInt("viz", View.INVISIBLE);
-//                msg.setData(b);
-//                mHandler.sendMessage(msg);
-            } else {
-                CharSequence str = "";
-                if (mMode == STATE_READY) {
-                    doReset();
-                    str = "READY";
-                } else if (mMode == STATE_PAUSE)
-                    str = "PAUSE";
-                else if (mMode == STATE_END)
-                    str = "END " + "- score is: " + mCurrentScore;
-                if (message != null) {
-                    str = message + "\n" + str;
-                }
-                if (mMode == STATE_END) mCurrentScore = 0;
-
-//                Message msg = mHandler.obtainMessage();
-//                Bundle b = new Bundle();
-//                b.putString("text", str.toString());
-//                b.putInt("viz", View.VISIBLE);
-//                msg.setData(b);
-//                mHandler.sendMessage(msg);
-            }
+            mMode = mode;
+            if (mMode == STATE_READY) doReset();
+            if (mMode == STATE_END) mCurrentScore = 0;
         }
     }
 
@@ -485,15 +443,6 @@ public class GameLoop extends Thread {
      */
     public void setDirection(int direction) {
         mDirection = direction;
-
-//        // TODO: For testing, delete me.
-//        String str = (mDirection > 0) ? "LEFT" : "RIGHT";
-//        Message msg = mHandler.obtainMessage();
-//        Bundle b = new Bundle();
-//        b.putString("text", str);
-//        b.putInt("viz", View.VISIBLE);
-//        msg.setData(b);
-//        mHandler.sendMessage(msg);
     }
 
     public int getCurrentScore() {

@@ -4,17 +4,17 @@ import android.graphics.RectF;
 
 import java.util.Random;
 
-import static com.nikmoores.android.endlessdodge.Utilities.FAB_RADIUS;
-import static com.nikmoores.android.endlessdodge.Utilities.MAX_ELEVATION;
-import static com.nikmoores.android.endlessdodge.Utilities.MAX_WIDTH;
-import static com.nikmoores.android.endlessdodge.Utilities.MIN_ELEVATION;
-import static com.nikmoores.android.endlessdodge.Utilities.MIN_HEIGHT;
 import static com.nikmoores.android.endlessdodge.Utilities.WALL_HEIGHT;
+import static com.nikmoores.android.endlessdodge.Utilities.WALL_OFFSET;
 import static com.nikmoores.android.endlessdodge.Utilities.WALL_WIDTH;
 import static com.nikmoores.android.endlessdodge.Utilities.screenWidth;
 
 /**
- * Created by Nik on 24/09/2015.
+ * Class for generating and managing wall pairs. Each generated wall pair relies of the one built
+ * previously. Each wall pair is offset to the left or right of the previous with a weighted chance.
+ *
+ * @author Nicholas Moores (Workshop Orange)
+ * @since 1.0
  */
 public class WallPair {
 
@@ -30,13 +30,6 @@ public class WallPair {
     private int yOffset;
     private int elevation;
     private boolean direction;
-
-    /**
-     * Default constructor. Should only be used for initial call.
-     */
-    public WallPair() {
-        initialiseWallPair(new Random().nextBoolean(), screenWidth / 2, -WALL_HEIGHT);
-    }
 
     /**
      * Constructor supporting previous wall pair data input, used to place newly constructed wall
@@ -56,76 +49,33 @@ public class WallPair {
      * Initialise a pair of boundary walls. Wall pair placement based on previously generated wall
      * pair.
      *
-     * @param direction The direction of the previously created wall pair, as compared to its
-     *                  predecessor.
-     * @param leftEdge  The X coordinate of the previously created wall pair's left wall outer edge.
-     * @param topEdge   The Y coordinate of the previous wall pair's top edge.
+     * @param directionLeft The direction of the previously created wall pair, as compared to its
+     *                      predecessor.
+     * @param leftEdge      The X coordinate of the previously created wall pair's left wall outer edge.
+     * @param topEdge       The Y coordinate of the previous wall pair's top edge.
      */
-    public void initialiseWallPair(boolean direction, int leftEdge, int topEdge) {
+    public void initialiseWallPair(boolean directionLeft, int leftEdge, int topEdge) {
         // Set xOffset direction based on input direction.
         if (new Random().nextInt(100) < PERCENT_CHANCE_SAME) {
-            this.direction = direction;
+            this.direction = directionLeft;
         } else {
-            this.direction = !direction;
+            this.direction = !directionLeft;
         }
 
         // Left wall inner edge calculations.
-        int offset = screenWidth / 6;       // TODO: Move this.
-        if (direction) { // Heading left.
-            xOffset = leftEdge - offset;
+        if (directionLeft) { // Heading left.
+            xOffset = leftEdge - WALL_OFFSET;
         } else {
-            xOffset = leftEdge + offset;
+            xOffset = leftEdge + WALL_OFFSET;
         }
 
-        // Set height.
+        // Set height, width, top.
         height = WALL_HEIGHT;
-
-        // Set width.
         width = WALL_WIDTH;
-
-        // Set elevation.
-        elevation = new Random().nextInt(MAX_ELEVATION - MIN_ELEVATION) + MIN_ELEVATION;
-
         yOffset = topEdge - height;
-    }
 
-    /**
-     * Original randomised setup. Currently unused in favour of a more regular import.
-     *
-     * @param direction The direction of the previously created wall pair, as compared to its
-     *                  predecessor.
-     * @param leftEdge  The X coordinate of the previously created wall pair's left wall outer edge.
-     * @param topEdge   The Y coordinate of the previous wall pair's top edge.
-     */
-    public void initialiseRandomisedWallPair(boolean direction, int leftEdge, int topEdge) {
-        // Set random width.
-        int minWidth = FAB_RADIUS * 8;
-        width = new Random().nextInt(FAB_RADIUS * 11 - minWidth) + minWidth;
-
-        // Set xOffset direction based on input direction.
-        if (new Random().nextInt(100) < PERCENT_CHANCE_SAME) {
-            this.direction = direction;
-        } else {
-            this.direction = !direction;
-        }
-
-        // Left wall inner edge calculations.
-        int offset = new Random().nextInt(screenWidth / 6);
-        if (direction) { // Heading left.
-            xOffset = leftEdge - offset;
-        } else {
-            xOffset = leftEdge + offset;
-        }
-        int avgWidth = (MAX_WIDTH - minWidth) / 2 + minWidth;
-        xOffset += (avgWidth - width) / 2;
-
-        // Set height.
-        height = new Random().nextInt(WALL_HEIGHT - MIN_HEIGHT + 1) + MIN_HEIGHT;
-
-        // Set elevation.
-        elevation = new Random().nextInt(MAX_ELEVATION - MIN_ELEVATION) + MIN_ELEVATION;
-
-        yOffset = -height + topEdge;
+        // Set elevation. // TODO: Currently unused, will I want this?
+//        elevation = new Random().nextInt(MAX_ELEVATION - MIN_ELEVATION) + MIN_ELEVATION;
     }
 
     /**
@@ -157,30 +107,47 @@ public class WallPair {
         return scratchRect;
     }
 
-    public int[] getLeftWallDimensions() {
-        return new int[]{0, yOffset, xOffset, yOffset + height};
-    }
-
-    public int[] getRightWallDimensions() {
-        return new int[]{xOffset + width, yOffset, screenWidth, yOffset + height};
-    }
-
+    /**
+     * Returns the wall pair's top edge (Y axis), which due to inverse Y axis, is less than
+     * the bottom edge.
+     *
+     * @return The top edge of the wall pair.
+     */
     public int getTop() {
         return yOffset;
     }
 
+    /**
+     * Returns the wall pair's bottom edge (Y axis), which due to inverse Y axis, is greater than
+     * the top edge.
+     *
+     * @return The bottom edge of the wall pair.
+     */
     public int getBottom() {
         return yOffset + height;
     }
 
+    /**
+     * Returns the wall pair's left wall edge.
+     *
+     * @return The inner edge of the left wall.
+     */
     public int getLeftEdge() {
         return xOffset;
     }
 
+    /**
+     * Returns the wall pair's right wall edge.
+     * @return The inner edge of the right wall.
+     */
     public int getRightEdge() {
         return xOffset + width;
     }
 
+    /**
+     * The wall pair's elevation (Z height).
+     * @return Wall pair elevation.
+     */
     public int getElevation() {
         return elevation;
     }
@@ -194,16 +161,20 @@ public class WallPair {
         return direction;
     }
 
+    /**
+     * Sets the wall pair's X offset.
+     * @param offset The new X offset.
+     */
     public void setXOffset(int offset) {
         xOffset = offset;
     }
 
     @Override
     public String toString() {
-        return "Top= " + yOffset +
-                ", Bottom= " + (yOffset + height) +
-                ", LeftWallX= " + xOffset +
-                ", RightWallX= " + (xOffset + width) +
-                ", Elevation= " + elevation;
+        return "Top: " + yOffset +
+                ", Bottom: " + (yOffset + height) +
+                ", LeftWallX: " + xOffset +
+                ", RightWallX: " + (xOffset + width) +
+                ", Elevation: " + elevation;
     }
 }
