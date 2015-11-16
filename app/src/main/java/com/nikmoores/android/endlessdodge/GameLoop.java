@@ -563,9 +563,11 @@ public class GameLoop extends Thread {
                 if ((wallPair.getLeftEdge() > FAB_X - FAB_RADIUS) ||
                         wallPair.getRightEdge() < FAB_X + FAB_RADIUS) {
                     // For now, assume a hit
-                    Log.d(LOG_TAG, wallPair.toString());
-                    Log.d(LOG_TAG, "FAB top = " + (FAB_Y - FAB_RADIUS));
-                    Log.d(LOG_TAG, "FAB left/right = " + (FAB_X - FAB_RADIUS) + "/" + (FAB_X + FAB_RADIUS));
+                    if (DEBUG_MODE) {
+                        Log.d(LOG_TAG, wallPair.toString());
+                        Log.d(LOG_TAG, "FAB top = " + (FAB_Y - FAB_RADIUS));
+                        Log.d(LOG_TAG, "FAB left/right = " + (FAB_X - FAB_RADIUS) + "/" + (FAB_X + FAB_RADIUS));
+                    }
                     // TODO: Make more accurate, after testing.
                     Intent intent = new Intent(Utilities.INTENT_FILTER);
                     intent.putExtra(Utilities.STATE_KEY, STATE_END);

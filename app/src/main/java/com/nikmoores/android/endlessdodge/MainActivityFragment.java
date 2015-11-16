@@ -264,7 +264,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
 //                Log.v(LOG_TAG, "screenHeight: " + screenHeight + ", mFab.getHeight: " + mFab.getHeight() + ", fabScale: " + fabScale);
                 fabRadius = (int) (mFab.getHeight() * fabScale / 2);
                 fabEndLocation[0] = (screenWidth - mFab.getHeight()) / 2;
-                fabEndLocation[1] = (int) (screenHeight - fabRadius * 1.75);
+                fabEndLocation[1] = screenHeight - fabRadius * 2;
                 Utilities.setFabMeasurements(
                         screenWidth / 2,
                         mFab.getHeight() / 2 + fabEndLocation[1],

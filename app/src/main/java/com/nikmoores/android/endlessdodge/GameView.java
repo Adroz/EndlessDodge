@@ -5,7 +5,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.TextView;
 
 /**
  * Created by Nik on 24/09/2015.
@@ -15,15 +14,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     final String LOG_TAG = MainActivity.class.getSimpleName();
 
     /**
-     * The thread that actually draws the animation
+     * The thread that draws the animation
      */
     private GameLoop gameLoop;
 
     private Context mContext;
-
-
-    // Testing TextView.
-    private TextView mStatusText;
 
     ThreadListener mListener = null;
 

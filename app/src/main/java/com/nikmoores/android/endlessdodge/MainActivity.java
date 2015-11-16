@@ -279,13 +279,18 @@ public class MainActivity extends AppCompatActivity implements
                 .setResultCallback(new ResultCallback<Leaderboards.LoadPlayerScoreResult>() {
 
                     @Override
-                    public void onResult(Leaderboards.LoadPlayerScoreResult arg0) {
-                        if (arg0 == null) return;
-                        float score = arg0.getScore().getRawScore();
-                        if (score > mOutbox.mBest) {
-                            mOutbox.mBest = score;
-                            mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
-                            mOutbox.saveLocal();
+                    public void onResult(Leaderboards.LoadPlayerScoreResult scoreResult) {
+                        if (scoreResult == null) return;
+                        if (scoreResult.getScore() == null) return;
+                        try {
+                            float score = scoreResult.getScore().getRawScore();
+                            if (score > mOutbox.mBest) {
+                                mOutbox.mBest = score;
+                                mMainActivityFragment.updateScoreViews(USER_SCORE, mOutbox.mBest, NO_FADE);
+                                mOutbox.saveLocal();
+                            }
+                        } catch (NullPointerException e) {
+                            Log.e(LOG_TAG, "scoreResult is null");
                         }
                     }
                 });
@@ -307,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onResult(Leaderboards.LoadScoresResult loadScoresResult) {
                 if (loadScoresResult == null) return;
+                if (loadScoresResult.getScores() == null) return;
                 if (loadScoresResult.getScores().getCount() <1) return;
                 float topScore = loadScoresResult.getScores().get(0).getRawScore();
                 if (topScore > currentBestScore) {
