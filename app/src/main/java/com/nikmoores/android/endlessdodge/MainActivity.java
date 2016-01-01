@@ -258,8 +258,8 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void updateAccomplishments(final int score) {
-        mOutbox.mScore = score/2;
-        mOutbox.mTotalDistance += score/2;
+        mOutbox.mScore = score;
+        mOutbox.mTotalDistance += score;
         mMainActivityFragment.updateScoreViews(CURRENT_SCORE, (float) mOutbox.mScore, NO_FADE);
 
         pushAchievements();

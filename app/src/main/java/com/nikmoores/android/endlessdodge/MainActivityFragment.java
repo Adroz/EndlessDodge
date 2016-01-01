@@ -368,7 +368,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onGameStop() {
         Log.v(LOG_TAG, "onGameStop, game reset.");
 
-        int finalScore = mGameLoop.getCurrentScore();
+        int finalScore = mGameLoop.getCurrentScore() / 2;
 
         mGameLoop.setState(GameLoop.STATE_END);
 
